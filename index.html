@@ -702,13 +702,14 @@ function initGame(cfg){
     },
 
     // finance
-    cash: country.startMoney,
+    cash: 0,            // Anak-anak lahir dengan saldo 0; uang hanya masuk via jalur resmi
     bankBalance: 0,
     bankDebt: 0,
     loanMonthly: 0,
     illicitCash: 0,
     salary: 0,
-    annualExpense: 2000,
+    annualExpense: 0,   // Biaya hidup 0 sampai usia 18 (dikelola calculateExpense)
+    baseExpense: 500,   // Biaya hidup dasar saat dewasa ($500/thn)
     inflationRate: 0.02,
 
     // career
@@ -868,6 +869,9 @@ function loadGame(){
     if(!G.newsLog) G.newsLog = [];
     if(!G.stockNextMultiplier) G.stockNextMultiplier = { TECH:1, ENRG:1, BNS:1 };
     if(!G.businessCashflowStreak) G.businessCashflowStreak = {};
+    if(G.baseExpense === undefined) G.baseExpense = 500;   // backward compat
+    // Backward compat: jika save lama punya annualExpense besar tapi age < 18, reset ke 0
+    if(G.age < 18) { G.annualExpense = 0; }
     showGame();
     showNotif(`Game dimuat! ${G.name}, usia ${G.age} tahun 💾`,'info');
   } catch(e) {
@@ -1033,10 +1037,38 @@ function renderActions(){
 
 
 // ─── NEXT YEAR (CORE LOOP) ────────────────────────────────────────────
+
+/**
+ * calculateExpense()
+ * Menghitung beban biaya hidup tahunan berdasarkan usia karakter.
+ *
+ * Aturan:
+ *   - Age < 18  → Biaya hidup = 0  (karakter masih anak/remaja, tanggungan orang tua)
+ *   - Age >= 18 → Biaya hidup aktif dimulai dari baseExpense ($500) yang tumbuh
+ *                 2% per tahun setiap kali nextYear() dipanggil (inflasi organik).
+ *
+ * @returns {number} Biaya hidup tahun ini (0 jika di bawah 18)
+ */
+function calculateExpense() {
+  if (G.age < 18) {
+    // Fase anak-anak: bebas tanggungan, tidak ada pemotongan kas pasif
+    return 0;
+  }
+  // Fase dewasa: biaya hidup aktif dengan inflasi organik
+  // annualExpense sudah tumbuh 2%/thn di akhir nextYear(), kita hanya kembalikan nilainya
+  return G.annualExpense;
+}
+
 function nextYear(){
   if(!G.isAlive){ showNotif('Karakter sudah meninggal.','warn'); return; }
 
   G.age++;
+
+  // ── Aktifkan biaya hidup dewasa saat pertama kali usia 18 ──
+  if (G.age === 18 && G.annualExpense === 0) {
+    G.annualExpense = G.baseExpense; // mulai dari $500/thn
+    addLog('🔔 Kamu resmi dewasa! Biaya hidup tahunan mulai berlaku ($500/thn).', 'warning');
+  }
 
   // Jail logic
   if(G.legalStatus === 'Di Penjara'){
@@ -1073,7 +1105,7 @@ function nextYear(){
     }
   }
 
-  // Hobby effects
+  // Hobby effects — hanya dipotong jika ada uang (proteksi anak-anak tetap berlaku via cash=0)
   if(G.hobbies.includes('gym')){ G.cash -= 50; G.stats.fitness = clamp(G.stats.fitness+3); G.stats.health = clamp(G.stats.health+2); }
   if(G.hobbies.includes('billiard')){ G.cash -= 100; G.stats.social = clamp(G.stats.social+4); G.stats.stress = clamp(G.stats.stress-5); }
   if(G.hobbies.includes('coding')){ G.cash -= 300; const intGain = G.trait==='Analytical'?Math.round(5*1.2):5; G.stats.intelligence = clamp(G.stats.intelligence+intGain); }
@@ -1111,14 +1143,25 @@ function nextYear(){
   // Stock annual update
   updateStocksAnnually();
 
-  // Expenses & inflation
-  G.annualExpense = Math.round(G.annualExpense * (1 + G.inflationRate));
-  G.cash -= G.annualExpense;
+  // ── PENGELUARAN TAHUNAN (ANTI-MINUS FASE ANAK-ANAK) ──────────────────
+  // calculateExpense() mengembalikan 0 jika Age < 18, sehingga saldo tidak
+  // pernah berkurang secara pasif selama karakter masih di bawah umur.
+  const yearlyExpense = calculateExpense();
+  if (G.age >= 18) {
+    // Terapkan pengeluaran hanya untuk dewasa
+    G.cash -= yearlyExpense;
+    if (yearlyExpense > 0) {
+      addLog(`🏠 Biaya hidup tahunan: ${fmtMoney(yearlyExpense)}`, 'warning');
+    }
+    // Tumbuhkan biaya hidup 2%/thn (inflasi organik) untuk tahun depan
+    G.annualExpense = Math.round(G.annualExpense * (1 + G.inflationRate));
+  }
+  // (Tidak ada pemotongan sama sekali jika Age < 18)
 
-  // Loan payment
-  if(G.loanMonthly > 0){ G.cash -= G.loanMonthly * 12; }
+  // Loan payment — hanya berlaku jika dewasa (pinjaman tidak diberikan ke anak-anak)
+  if(G.loanMonthly > 0 && G.age >= 18){ G.cash -= G.loanMonthly * 12; }
 
-  // Income tax
+  // Income tax — hanya jika ada gaji (dan biasanya sudah dewasa)
   const taxRate = G.businesses.length > 0 ? 0.25 : 0.10;
   if(G.salary > 0){ const tax = Math.round(G.salary * taxRate); G.cash -= tax; if(tax>0) addLog(`💸 Pajak penghasilan: ${fmtMoney(tax)} (${taxRate*100}%)`,'warning'); }
 
@@ -1129,8 +1172,27 @@ function nextYear(){
     addLog(`🏛️ Gaji jabatan politik: +${fmtMoney(polSalary)}`,'good');
   }
 
-  // Stress from cashflow
-  if(G.cash < 0){ G.stats.stress = clamp(G.stats.stress + 15); G.stats.happiness = clamp(G.stats.happiness - 10); addLog('😰 Cashflow minus! Stres meningkat.','bad'); }
+  // ── KONSEKUENSI FINANSIAL FASE DEWASA ────────────────────────────────
+  if (G.age >= 18) {
+    // Proteksi saldo: hanya fase dewasa yang boleh menyentuh minus
+    if (G.cash < 0) {
+      // Stres krisis keuangan: +15 per tahun jika cash minus
+      G.stats.stress = clamp(G.stats.stress + 15);
+      G.stats.happiness = clamp(G.stats.happiness - 10);
+      addLog('😰 Cashflow minus! Biaya hidup melebihi pemasukan. Stres +15.', 'bad');
+
+      // Jika pengangguran dewasa tanpa pemasukan pasif sama sekali, berikan peringatan ekstra
+      const hasPassiveIncome = G.businesses.length > 0 || G.ownedProperties.length > 0 || G.politicalRank > 0;
+      if (G.job === 'Pengangguran' && !hasPassiveIncome) {
+        addLog('⚠️ Kamu pengangguran tanpa pemasukan! Segera cari pekerjaan atau bisnis.', 'bad');
+      }
+    }
+  }
+  // Fase anak-anak: saldo tidak boleh minus akibat beban hidup.
+  // (Hobi bisa mengurangi kas jika ada, tapi tidak akan memaksa ke minus karena kas awal 0)
+  if (G.age < 18 && G.cash < 0) {
+    G.cash = 0; // Proteksi keras: saldo anak tidak boleh minus dari beban pasif
+  }
 
   // Heat decay
   if(G.heat > 0){ G.heat = clamp(G.heat - 5); }
@@ -1274,6 +1336,10 @@ function continueAsChild(){
   G.motherAge = G.age + rnd(20,28);
   G.lifeLog = [];
   G.usedEventIds = new Set();
+  // Generasi baru dimulai di usia 18 — biaya hidup langsung aktif
+  G.baseExpense = 500;
+  G.annualExpense = G.baseExpense;
+  G.inflationRate = 0.02;
 
   addLog(`🌱 Generasi ${G.generation}: ${G.name} lahir dan mewarisi kekayaan dari ${prevName}.`,'good');
   addLog(`💰 Warisan yang diterima: ${fmtMoney(inheritedCash)}`,'good');
@@ -1310,10 +1376,13 @@ function calcAnnualCashflow(){
   G.businesses.forEach(b=>{ cf += b.baseProfit - b.wage - b.adBudget; });
   G.ownedProperties.forEach(pid=>{ const p=PROPERTIES.find(x=>x.id===pid); if(p) cf+=p.rent; });
   if(G.politicalRank>0) cf += [0,2000,8000,20000,50000][G.politicalRank]||0;
-  cf -= G.annualExpense;
-  cf -= G.loanMonthly*12;
-  const taxRate = G.businesses.length>0?0.25:0.10;
-  if(G.salary>0) cf -= Math.round(G.salary*taxRate);
+  // Biaya hidup hanya berlaku untuk dewasa (Age >= 18)
+  if (G.age >= 18) {
+    cf -= G.annualExpense;
+    cf -= G.loanMonthly*12;
+    const taxRate = G.businesses.length>0?0.25:0.10;
+    if(G.salary>0) cf -= Math.round(G.salary*taxRate);
+  }
   return cf;
 }
 
@@ -1871,6 +1940,11 @@ function commitCrime(crimeId){
   const successRate = (G.stats.intelligence + G.criminalRep) / 200;
   if(Math.random() < successRate){
     G.illicitCash += crime.reward;
+    // Anak-anak (Age < 18) langsung menerima uang tunai hasil kejahatan kecil
+    // (uang saku ilegal — sesuai aturan jalur resmi pengecualian)
+    if (G.age < 18) {
+      G.cash += crime.reward;
+    }
     G.heat = clamp(G.heat + crime.heat);
     G.criminalRep = clamp(G.criminalRep + 5);
     G.totalCrimes++;
