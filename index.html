@@ -1,0 +1,2703 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi Kehidupan: Indonesia</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root {
+    --bg-main:#0c0c0e; --bg-card:#1c1c1e; --accent-green:#2ecc71;
+    --accent-blue:#007aff; --text-muted:#8e8e93;
+  }
+  * { box-sizing: border-box; margin:0; padding:0; }
+  body { background:#0c0c0e; color:#fff; font-family:'Segoe UI',sans-serif; min-height:100vh; }
+  ::-webkit-scrollbar { width:4px; height:4px; }
+  ::-webkit-scrollbar-track { background:#0c0c0e; }
+  ::-webkit-scrollbar-thumb { background:#333; border-radius:4px; }
+  .card { background:#1c1c1e; border-radius:14px; }
+  .btn-green { background:#2ecc71; color:#000; font-weight:700; border-radius:10px; padding:10px 20px; cursor:pointer; border:none; transition:all .2s; }
+  .btn-green:hover { background:#27ae60; transform:scale(1.02); }
+  .btn-blue { background:#007aff; color:#fff; font-weight:700; border-radius:10px; padding:10px 20px; cursor:pointer; border:none; transition:all .2s; }
+  .btn-blue:hover { background:#0063cc; transform:scale(1.02); }
+  .btn-red { background:#ff3b30; color:#fff; font-weight:700; border-radius:10px; padding:10px 20px; cursor:pointer; border:none; transition:all .2s; }
+  .btn-red:hover { background:#cc2f26; }
+  .btn-gray { background:#2c2c2e; color:#fff; font-weight:600; border-radius:10px; padding:10px 20px; cursor:pointer; border:none; transition:all .2s; }
+  .btn-gray:hover { background:#3a3a3c; }
+  .btn-yellow { background:#ff9f0a; color:#000; font-weight:700; border-radius:10px; padding:10px 20px; cursor:pointer; border:none; transition:all .2s; }
+  .btn-yellow:hover { background:#cc7f08; }
+  .nav-tab { display:flex; align-items:center; gap:6px; padding:8px 16px; border-radius:20px; cursor:pointer; white-space:nowrap; font-size:13px; font-weight:600; transition:all .2s; color:#8e8e93; }
+  .nav-tab.active { background:#007aff; color:#fff; }
+  .nav-tab:not(.active):hover { background:#2c2c2e; color:#fff; }
+  .circular-chart { width:90px; height:90px; }
+  .circle-bg { fill:none; stroke:#2c2c2e; stroke-width:3.8; }
+  .circle { fill:none; stroke-width:3.8; stroke-linecap:round; transition:stroke-dasharray 0.5s ease; }
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:1000; display:flex; align-items:center; justify-content:center; padding:16px; }
+  .modal-box { background:#1c1c1e; border-radius:18px; padding:24px; max-width:480px; width:100%; max-height:90vh; overflow-y:auto; border:1px solid #2c2c2e; }
+  .input-field { background:#2c2c2e; border:1px solid #3a3a3c; border-radius:10px; padding:10px 14px; color:#fff; width:100%; font-size:14px; outline:none; }
+  .input-field:focus { border-color:#007aff; }
+  select.input-field option { background:#2c2c2e; }
+  .log-item { padding:8px 12px; border-radius:8px; background:#2c2c2e; margin-bottom:6px; font-size:13px; line-height:1.5; }
+  .log-item.good { border-left:3px solid #2ecc71; }
+  .log-item.bad { border-left:3px solid #ff3b30; }
+  .log-item.neutral { border-left:3px solid #007aff; }
+  .log-item.warning { border-left:3px solid #ff9f0a; }
+  .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:700; }
+  .badge-green { background:rgba(46,204,113,.2); color:#2ecc71; border:1px solid rgba(46,204,113,.3); }
+  .badge-red { background:rgba(255,59,48,.2); color:#ff3b30; border:1px solid rgba(255,59,48,.3); }
+  .badge-blue { background:rgba(0,122,255,.2); color:#007aff; border:1px solid rgba(0,122,255,.3); }
+  .badge-yellow { background:rgba(255,159,10,.2); color:#ff9f0a; border:1px solid rgba(255,159,10,.3); }
+  .badge-gray { background:rgba(142,142,147,.2); color:#8e8e93; border:1px solid rgba(142,142,147,.3); }
+  .progress-bar { height:6px; border-radius:3px; background:#2c2c2e; overflow:hidden; }
+  .progress-fill { height:100%; border-radius:3px; transition:width .4s ease; }
+  .stat-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+  .stat-label { width:100px; font-size:12px; color:#8e8e93; }
+  .stat-val { width:36px; text-align:right; font-size:12px; font-weight:700; }
+  #main-menu, #char-customize, #game-container { display:none; }
+  .tab-content { display:none; }
+  .tab-content.active { display:block; }
+  .stock-card { background:#2c2c2e; border-radius:12px; padding:12px; margin-bottom:8px; }
+  .tree-node { background:#1c1c1e; border:2px solid #3a3a3c; border-radius:10px; padding:10px 16px; text-align:center; cursor:pointer; transition:all .2s; min-width:120px; }
+  .tree-node:hover { border-color:#007aff; }
+  .tree-line { width:2px; height:30px; background:#3a3a3c; margin:0 auto; }
+  .tree-h-line { height:2px; background:#3a3a3c; flex:1; }
+  .notification { position:fixed; top:20px; right:20px; z-index:2000; background:#1c1c1e; border-radius:12px; padding:14px 18px; border:1px solid #2c2c2e; max-width:320px; font-size:14px; box-shadow:0 8px 32px rgba(0,0,0,.5); animation: slideIn .3s ease; }
+  @keyframes slideIn { from { transform:translateX(120%); opacity:0; } to { transform:translateX(0); opacity:1; } }
+  @keyframes slideOut { from { transform:translateX(0); opacity:1; } to { transform:translateX(120%); opacity:0; } }
+  .notif-good { border-left:4px solid #2ecc71; }
+  .notif-bad { border-left:4px solid #ff3b30; }
+  .notif-info { border-left:4px solid #007aff; }
+  .notif-warn { border-left:4px solid #ff9f0a; }
+  .age-btn { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,#2ecc71,#1abc9c); color:#000; font-weight:900; font-size:15px; border:none; cursor:pointer; box-shadow:0 0 24px rgba(46,204,113,.4); transition:all .2s; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .age-btn:hover { transform:scale(1.08); box-shadow:0 0 36px rgba(46,204,113,.6); }
+  .age-btn:active { transform:scale(0.96); }
+  .section-title { font-size:18px; font-weight:800; margin-bottom:16px; color:#fff; }
+  .sub-section { font-size:14px; font-weight:700; color:#8e8e93; margin-bottom:10px; text-transform:uppercase; letter-spacing:.5px; }
+  .divider { height:1px; background:#2c2c2e; margin:16px 0; }
+  .poin-ctrl { display:flex; align-items:center; gap:8px; }
+  .poin-btn { width:28px; height:28px; border-radius:50%; border:none; cursor:pointer; font-size:16px; font-weight:700; display:flex; align-items:center; justify-content:center; transition:all .15s; }
+  .poin-btn-plus { background:#2ecc71; color:#000; }
+  .poin-btn-minus { background:#ff3b30; color:#fff; }
+  .poin-btn:hover { transform:scale(1.15); }
+  .event-choice-btn { width:100%; text-align:left; background:#2c2c2e; border:1px solid #3a3a3c; border-radius:10px; padding:12px 16px; color:#fff; cursor:pointer; font-size:14px; transition:all .2s; margin-bottom:8px; }
+  .event-choice-btn:hover { background:#3a3a3c; border-color:#007aff; }
+  .passport-doc { background:linear-gradient(135deg,#1a3a2a,#0d2417); border:2px solid #2ecc71; border-radius:12px; padding:20px; font-family:monospace; }
+  .sim-browser { background:#f2f2f7; color:#1c1c1e; border-radius:14px; overflow:hidden; }
+  .browser-bar { background:#fff; padding:10px 16px; display:flex; align-items:center; gap:10px; border-bottom:1px solid #e5e5ea; }
+  .browser-url { background:#e5e5ea; border-radius:8px; padding:6px 12px; flex:1; font-size:12px; color:#555; }
+  .browser-content { padding:16px; }
+  .quiz-opt { display:block; width:100%; text-align:left; background:#2c2c2e; border:1px solid #3a3a3c; border-radius:8px; padding:10px 14px; color:#fff; cursor:pointer; font-size:13px; margin-bottom:6px; transition:all .2s; }
+  .quiz-opt:hover { background:#3a3a3c; }
+  .quiz-opt.correct { background:rgba(46,204,113,.25); border-color:#2ecc71; }
+  .quiz-opt.wrong { background:rgba(255,59,48,.25); border-color:#ff3b30; }
+</style>
+</head>
+<body>
+
+
+<!-- ===== MAIN MENU ===== -->
+<div id="main-menu" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding:24px;">
+  <div style="text-align:center; margin-bottom:40px;">
+    <div style="font-size:48px; margin-bottom:8px;">🇮🇩</div>
+    <h1 style="font-size:32px; font-weight:900; background:linear-gradient(135deg,#2ecc71,#007aff); -webkit-background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:8px;">Simulasi Kehidupan</h1>
+    <p style="font-size:18px; font-weight:700; color:#fff; margin-bottom:4px;">Indonesia</p>
+    <p style="font-size:13px; color:#8e8e93;">Versi Premium — Semua DLC Terbuka Gratis</p>
+  </div>
+  <div style="width:100%; max-width:400px; display:flex; flex-direction:column; gap:14px;">
+    <button class="btn-green" style="width:100%; padding:16px; font-size:16px;" onclick="startRandom()">
+      🎲 Lahir Acak
+      <div style="font-size:12px; font-weight:400; opacity:.8; margin-top:2px;">Sistem akan mengacak karakter untuk Anda</div>
+    </button>
+    <button class="btn-blue" style="width:100%; padding:16px; font-size:16px;" onclick="showCustomize()">
+      ✨ Kustomisasi Karakter
+      <div style="font-size:12px; font-weight:400; opacity:.8; margin-top:2px;">PREMIUM UNLOCKED — Atur sendiri karakter Anda</div>
+    </button>
+    <div id="mm-load-btn" style="display:none;">
+      <button class="btn-gray" style="width:100%; padding:16px; font-size:16px;" onclick="loadGame()">
+        💾 Lanjutkan Permainan Tersimpan
+      </button>
+    </div>
+  </div>
+  <p style="margin-top:32px; font-size:12px; color:#3a3a3c;">v1.0 · Hanskuy14 · 2026</p>
+</div>
+
+<!-- ===== CHARACTER CUSTOMIZE ===== -->
+<div id="char-customize" style="display:none; min-height:100vh; padding:24px; max-width:600px; margin:0 auto;">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
+    <button class="btn-gray" style="padding:8px 14px;" onclick="showMainMenu()">← Kembali</button>
+    <h2 style="font-size:20px; font-weight:800;">✨ Kustomisasi Karakter</h2>
+  </div>
+  <div class="card" style="padding:20px; margin-bottom:16px;">
+    <p class="sub-section">Identitas</p>
+    <div style="display:flex; gap:10px; margin-bottom:12px;">
+      <input id="c-name" class="input-field" placeholder="Nama Lengkap" style="flex:1;">
+      <button class="btn-gray" style="padding:10px 14px; white-space:nowrap;" onclick="randomizeName()">🎲 Acak</button>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px; color:#8e8e93; display:block; margin-bottom:6px;">Jenis Kelamin</label>
+        <select id="c-gender" class="input-field">
+          <option value="Laki-laki">Laki-laki</option>
+          <option value="Perempuan">Perempuan</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px; color:#8e8e93; display:block; margin-bottom:6px;">Negara Asal</label>
+        <select id="c-country" class="input-field" onchange="updateCountryInfo()">
+          <option value="Indonesia">🇮🇩 Indonesia</option>
+          <option value="Amerika Serikat">🇺🇸 Amerika Serikat</option>
+          <option value="Jepang">🇯🇵 Jepang</option>
+          <option value="Jerman">🇩🇪 Jerman</option>
+          <option value="Swiss">🇨🇭 Swiss</option>
+        </select>
+      </div>
+    </div>
+    <div id="country-info" style="font-size:12px; color:#8e8e93; background:#2c2c2e; padding:8px 12px; border-radius:8px;"></div>
+  </div>
+  <div class="card" style="padding:20px; margin-bottom:16px;">
+    <p class="sub-section">Sifat Bawaan (Pilih 1)</p>
+    <div id="trait-options" style="display:flex; flex-direction:column; gap:10px;">
+      <div class="trait-card" data-trait="Analytical" onclick="selectTrait('Analytical')" style="background:#2c2c2e; border:2px solid #3a3a3c; border-radius:12px; padding:14px; cursor:pointer; transition:all .2s;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:24px;">🧠</span>
+          <div>
+            <div style="font-weight:700; font-size:14px;">Analytical</div>
+            <div style="font-size:12px; color:#8e8e93; margin-top:2px;">+20% kecepatan naikkan Kecerdasan · +10% peluang untung saham</div>
+          </div>
+        </div>
+      </div>
+      <div class="trait-card" data-trait="Creative" onclick="selectTrait('Creative')" style="background:#2c2c2e; border:2px solid #3a3a3c; border-radius:12px; padding:14px; cursor:pointer; transition:all .2s;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:24px;">🎨</span>
+          <div>
+            <div style="font-weight:700; font-size:14px;">Creative</div>
+            <div style="font-size:12px; color:#8e8e93; margin-top:2px;">Statistik Musik & Seni dimulai 75% · +Kreativitas saat karir seni</div>
+          </div>
+        </div>
+      </div>
+      <div class="trait-card" data-trait="Athletic" onclick="selectTrait('Athletic')" style="background:#2c2c2e; border:2px solid #3a3a3c; border-radius:12px; padding:14px; cursor:pointer; transition:all .2s;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:24px;">💪</span>
+          <div>
+            <div style="font-weight:700; font-size:14px;">Athletic</div>
+            <div style="font-size:12px; color:#8e8e93; margin-top:2px;">Fitness awal 75% · Risiko sakit berkurang 40% di usia muda</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card" style="padding:20px; margin-bottom:16px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <p class="sub-section" style="margin:0;">Alokasi Poin Atribut</p>
+      <span id="poin-sisa" style="font-size:13px; font-weight:700; color:#2ecc71;">Sisa: 100 Poin</span>
+    </div>
+    <div id="attr-alloc">
+      <div class="stat-row" style="justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px; flex:1;">
+          <span style="font-size:18px;">😊</span>
+          <span style="font-size:14px; font-weight:600;">Kebahagiaan</span>
+        </div>
+        <div class="poin-ctrl">
+          <button class="poin-btn poin-btn-minus" onclick="allocPoint('happiness',-1)">−</button>
+          <span id="alloc-happiness" style="min-width:32px; text-align:center; font-weight:700;">10</span>
+          <button class="poin-btn poin-btn-plus" onclick="allocPoint('happiness',1)">+</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-row" style="justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px; flex:1;">
+          <span style="font-size:18px;">🧠</span>
+          <span style="font-size:14px; font-weight:600;">Kecerdasan</span>
+        </div>
+        <div class="poin-ctrl">
+          <button class="poin-btn poin-btn-minus" onclick="allocPoint('intelligence',-1)">−</button>
+          <span id="alloc-intelligence" style="min-width:32px; text-align:center; font-weight:700;">10</span>
+          <button class="poin-btn poin-btn-plus" onclick="allocPoint('intelligence',1)">+</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-row" style="justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px; flex:1;">
+          <span style="font-size:18px;">✨</span>
+          <span style="font-size:14px; font-weight:600;">Penampilan</span>
+        </div>
+        <div class="poin-ctrl">
+          <button class="poin-btn poin-btn-minus" onclick="allocPoint('appearance',-1)">−</button>
+          <span id="alloc-appearance" style="min-width:32px; text-align:center; font-weight:700;">10</span>
+          <button class="poin-btn poin-btn-plus" onclick="allocPoint('appearance',1)">+</button>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="stat-row" style="justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:8px; flex:1;">
+          <span style="font-size:18px;">🏃</span>
+          <span style="font-size:14px; font-weight:600;">Kebugaran</span>
+        </div>
+        <div class="poin-ctrl">
+          <button class="poin-btn poin-btn-minus" onclick="allocPoint('fitness',-1)">−</button>
+          <span id="alloc-fitness" style="min-width:32px; text-align:center; font-weight:700;">10</span>
+          <button class="poin-btn poin-btn-plus" onclick="allocPoint('fitness',1)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <button class="btn-green" id="spawn-btn" style="width:100%; padding:16px; font-size:16px; margin-bottom:24px;" onclick="spawnCharacter()">
+    🚀 Mulai Hidup Baru (Spawn)
+  </button>
+</div>
+
+
+<!-- ===== GAME CONTAINER ===== -->
+<div id="game-container" style="display:none; min-height:100vh; padding-bottom:80px;">
+
+  <!-- TOP BAR -->
+  <div style="position:sticky; top:0; z-index:100; background:#0c0c0e; border-bottom:1px solid #1c1c1e; padding:10px 16px;">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div id="hud-flag" style="font-size:24px;">🇮🇩</div>
+        <div>
+          <div id="hud-name" style="font-weight:800; font-size:15px;"></div>
+          <div id="hud-age" style="font-size:12px; color:#8e8e93;"></div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div style="text-align:right;">
+          <div id="hud-cash" style="font-weight:800; font-size:15px; color:#2ecc71;"></div>
+          <div id="hud-job" style="font-size:11px; color:#8e8e93;"></div>
+        </div>
+        <button class="age-btn" onclick="nextYear()">
+          <span style="font-size:18px;">+1</span>
+          <span style="font-size:10px;">Tahun</span>
+        </button>
+      </div>
+    </div>
+    <!-- NAV TABS -->
+    <div style="display:flex; gap:6px; overflow-x:auto; padding-bottom:2px;">
+      <div class="nav-tab active" data-tab="profil" onclick="switchTab('profil')">👤 Profil</div>
+      <div class="nav-tab" data-tab="keluarga" onclick="switchTab('keluarga')">🌳 Silsilah</div>
+      <div class="nav-tab" data-tab="internet" onclick="switchTab('internet')">🌐 Internet</div>
+      <div class="nav-tab" data-tab="karir" onclick="switchTab('karir')">💼 Karir</div>
+      <div class="nav-tab" data-tab="politik" onclick="switchTab('politik')">🏛️ Politik</div>
+      <div class="nav-tab" data-tab="kriminal" onclick="switchTab('kriminal')">🔫 Kriminal</div>
+      <div class="nav-tab" data-tab="aset" onclick="switchTab('aset')">🏢 Aset</div>
+      <div class="nav-tab" data-tab="bank" onclick="switchTab('bank')">🏦 Bank</div>
+    </div>
+  </div>
+
+  <!-- CONTENT AREA -->
+  <div style="padding:16px; max-width:700px; margin:0 auto;">
+
+    <!-- ===== TAB: PROFIL ===== -->
+    <div id="tab-profil" class="tab-content active">
+      <!-- Stats Circles -->
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <p class="section-title" style="margin:0;">📊 Statistik</p>
+          <span id="profil-trait-badge" class="badge badge-blue"></span>
+        </div>
+        <div id="stats-circles" style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; text-align:center;"></div>
+      </div>
+      <!-- Info Card -->
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <p class="section-title">ℹ️ Info Karakter</p>
+        <div id="char-info-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px;"></div>
+      </div>
+      <!-- Sub Tabs Actions -->
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <p class="section-title">⚡ Tindakan</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;" id="action-btns">
+          <button class="btn-gray" style="font-size:13px;" onclick="showPassport()">🪪 Lihat Paspor</button>
+          <button class="btn-gray" style="font-size:13px;" onclick="emigrate()">✈️ Emigrasi ($2.500)</button>
+          <button class="btn-gray" style="font-size:13px;" onclick="drivingTest()">🚗 Ujian SIM ($1.400)</button>
+          <button class="btn-gray" style="font-size:13px;" onclick="goHospital()">🏥 Rumah Sakit</button>
+          <button class="btn-gray" style="font-size:13px;" onclick="familyDinner()">🍽️ Gengsi Keluarga ($1.000)</button>
+          <button class="btn-gray" style="font-size:13px;" onclick="showHobbyMenu()">🎯 Hobi & Gaya Hidup</button>
+          <button id="btn-sexuality" class="btn-gray" style="font-size:13px; display:none;" onclick="showSexuality()">💕 Seksualitas & Gaya</button>
+          <button id="btn-options" class="btn-gray" style="font-size:13px;" onclick="showOptions()">⚙️ Opsi & Save</button>
+          <button class="btn-red" style="font-size:13px; grid-column:1/-1;" onclick="confirmEndLife()">💀 Akhiri Hidup</button>
+        </div>
+      </div>
+      <!-- Log Tahunan -->
+      <div class="card" style="padding:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <p class="section-title" style="margin:0;">📜 Log Kehidupan</p>
+          <button class="btn-gray" style="padding:6px 12px; font-size:12px;" onclick="clearLog()">Hapus</button>
+        </div>
+        <div id="life-log" style="max-height:300px; overflow-y:auto; display:flex; flex-direction:column;"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: KELUARGA ===== -->
+    <div id="tab-keluarga" class="tab-content">
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <p class="section-title" style="margin:0;">🌳 Silsilah Keluarga</p>
+          <div style="text-align:right;">
+            <div style="font-size:11px; color:#8e8e93;">Gengsi Keluarga</div>
+            <div id="family-prestige-val" style="font-size:18px; font-weight:800; color:#ff9f0a;">0/100</div>
+          </div>
+        </div>
+        <div id="family-tree-container" style="padding:10px;"></div>
+      </div>
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <p class="section-title">❤️ Kehidupan Asmara</p>
+        <div id="romance-section"></div>
+      </div>
+      <div class="card" style="padding:16px;">
+        <p class="section-title">👶 Anak-anak</p>
+        <div id="children-section"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: INTERNET ===== -->
+    <div id="tab-internet" class="tab-content">
+      <div class="sim-browser" style="margin-bottom:16px;">
+        <div class="browser-bar">
+          <span style="color:#ccc; font-size:18px;">⬅</span>
+          <span style="color:#ccc; font-size:18px;">➡</span>
+          <div class="browser-url">simweb.id — Browser Simulasi</div>
+          <span style="color:#ccc; font-size:18px;">↻</span>
+        </div>
+        <div class="browser-content">
+          <p style="font-size:13px; color:#555; margin-bottom:12px;">🔖 Bookmark</p>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div onclick="browserPage('saham')" style="background:#fff; border:1px solid #e5e5ea; border-radius:10px; padding:14px; cursor:pointer; text-align:center; transition:all .2s;" onmouseover="this.style.background='#f0f8ff'" onmouseout="this.style.background='#fff'">
+              <div style="font-size:28px; margin-bottom:4px;">📈</div>
+              <div style="font-size:13px; font-weight:700; color:#1c1c1e;">Pasar Saham</div>
+              <div style="font-size:11px; color:#888;">SimBursa.id</div>
+            </div>
+            <div onclick="browserPage('properti')" style="background:#fff; border:1px solid #e5e5ea; border-radius:10px; padding:14px; cursor:pointer; text-align:center; transition:all .2s;" onmouseover="this.style.background='#fff8f0'" onmouseout="this.style.background='#fff'">
+              <div style="font-size:28px; margin-bottom:4px;">🏘️</div>
+              <div style="font-size:13px; font-weight:700; color:#1c1c1e;">Real Estate</div>
+              <div style="font-size:11px; color:#888;">RumahSim.id</div>
+            </div>
+            <div onclick="browserPage('betting')" style="background:#fff; border:1px solid #e5e5ea; border-radius:10px; padding:14px; cursor:pointer; text-align:center; transition:all .2s;" onmouseover="this.style.background='#f0fff4'" onmouseout="this.style.background='#fff'">
+              <div style="font-size:28px; margin-bottom:4px;">⚽</div>
+              <div style="font-size:13px; font-weight:700; color:#1c1c1e;">World Cup Betting</div>
+              <div style="font-size:11px; color:#888;">TaruhBola.id</div>
+            </div>
+            <div onclick="browserPage('berita')" style="background:#fff; border:1px solid #e5e5ea; border-radius:10px; padding:14px; cursor:pointer; text-align:center; transition:all .2s;" onmouseover="this.style.background='#fff0f0'" onmouseout="this.style.background='#fff'">
+              <div style="font-size:28px; margin-bottom:4px;">📰</div>
+              <div style="font-size:13px; font-weight:700; color:#1c1c1e;">Berita Ekonomi</div>
+              <div style="font-size:11px; color:#888;">BeritaSim.id</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="browser-page-content"></div>
+    </div>
+
+    <!-- ===== TAB: KARIR ===== -->
+    <div id="tab-karir" class="tab-content">
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <p class="section-title">🎓 Pendidikan</p>
+        <div id="education-section"></div>
+      </div>
+      <div class="card" style="padding:16px;">
+        <p class="section-title">💼 Karir & Pekerjaan</p>
+        <div id="career-section"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: POLITIK ===== -->
+    <div id="tab-politik" class="tab-content">
+      <div class="card" style="padding:16px; margin-bottom:16px; border:1px solid rgba(255,159,10,.3);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:20px;">🏛️</span>
+          <p class="section-title" style="margin:0;">Karir Politik</p>
+          <span class="badge badge-yellow">DLC UNLOCKED</span>
+        </div>
+        <p style="font-size:13px; color:#8e8e93;">Jalur karir politik eksklusif untuk menjadi pemimpin negara</p>
+      </div>
+      <div id="politik-section"></div>
+    </div>
+
+    <!-- ===== TAB: KRIMINAL ===== -->
+    <div id="tab-kriminal" class="tab-content">
+      <div class="card" style="padding:16px; margin-bottom:16px; border:1px solid rgba(255,59,48,.3);">
+        <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+          <span style="font-size:20px;">🔫</span>
+          <p class="section-title" style="margin:0;">Dunia Bawah</p>
+          <span class="badge badge-red">SISI GELAP</span>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:12px;" id="criminal-stats"></div>
+      </div>
+      <div id="criminal-actions"></div>
+    </div>
+
+    <!-- ===== TAB: ASET ===== -->
+    <div id="tab-aset" class="tab-content">
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <p class="section-title">💰 Net Worth & Cashflow</p>
+        <div id="networth-display"></div>
+      </div>
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <p class="section-title">🏢 Bisnis Saya</p>
+        <div id="business-list"></div>
+        <button class="btn-blue" style="width:100%; margin-top:12px;" onclick="showFoundBusiness()">+ Dirikan Bisnis Baru</button>
+      </div>
+      <div class="card" style="padding:16px;">
+        <p class="section-title">🏠 Properti Saya</p>
+        <div id="property-list"></div>
+      </div>
+    </div>
+
+    <!-- ===== TAB: BANK ===== -->
+    <div id="tab-bank" class="tab-content">
+      <div class="card" style="padding:16px; margin-bottom:16px;">
+        <p class="section-title">🏦 Rekening Bank</p>
+        <div id="bank-section"></div>
+      </div>
+      <div class="card" style="padding:16px;">
+        <p class="section-title">💳 Pinjaman & Cicilan</p>
+        <div id="loan-section"></div>
+      </div>
+    </div>
+
+  </div><!-- end content area -->
+</div><!-- end game container -->
+
+<!-- ===== MODAL CONTAINER ===== -->
+<div id="modal-container"></div>
+<!-- ===== NOTIFICATION AREA ===== -->
+<div id="notif-area"></div>
+
+
+<script>
+// =====================================================================
+//  SIMULASI KEHIDUPAN: INDONESIA  —  Engine v1.0
+// =====================================================================
+
+// ─── GLOBAL STATE ────────────────────────────────────────────────────
+let G = {};   // game state
+
+const COUNTRIES = {
+  'Indonesia':       { flag:'🇮🇩', currency:'IDR', startMoney:5000,   birthCity:'Jakarta' },
+  'Amerika Serikat': { flag:'🇺🇸', currency:'USD', startMoney:10000,  birthCity:'New York' },
+  'Jepang':          { flag:'🇯🇵', currency:'JPY', startMoney:8000,   birthCity:'Tokyo' },
+  'Jerman':          { flag:'🇩🇪', currency:'EUR', startMoney:9000,   birthCity:'Berlin' },
+  'Swiss':           { flag:'🇨🇭', currency:'CHF', startMoney:12000,  birthCity:'Zurich' }
+};
+
+const MALE_NAMES = ['Budi','Andi','Rizky','Farhan','Dimas','Bagas','Hendra','Wahyu','Arief','Fajar','Gilang','Hafiz','Ivan','Joko','Lukas','Mirza','Naufal','Okta','Pandu','Rafi','Satria','Teguh','Umar','Vino','Wildan','Yusuf','Zaky','Arya','Bima','Chandra'];
+const FEMALE_NAMES = ['Siti','Dewi','Rina','Ayu','Fitri','Indah','Maya','Nita','Putri','Raisa','Sari','Tika','Umi','Vina','Wati','Yuni','Zahra','Anggun','Bunga','Citra','Dina','Eka','Fina','Gita','Hana','Intan','Jeni','Karina','Lina','Mira'];
+const LAST_NAMES = ['Santoso','Wijaya','Kusuma','Pratama','Setiawan','Nugroho','Hidayat','Ramadhan','Susanto','Hartono','Wibowo','Saputra','Kurniawan','Putra','Gunawan','Wahyudi','Purnama','Suharto','Basuki','Tanaka','Müller','Johnson','Schmidt','Weber'];
+
+const EDUCATION_LEVELS = ['Belum Sekolah','SD','SMP','SMA','Diploma','Sarjana (S1)','Magister (S2)','Doktor (S3)'];
+
+const JOBS = {
+  'Pengangguran': { minEdu:0, salary:0,     requires:{} },
+  'Buruh Pabrik': { minEdu:2, salary:800,   requires:{} },
+  'Kasir':        { minEdu:3, salary:1200,  requires:{} },
+  'OB/Cleaning':  { minEdu:2, salary:900,   requires:{} },
+  'Sales':        { minEdu:3, salary:1500,  requires:{ social:30 } },
+  'Admin Kantor': { minEdu:4, salary:2000,  requires:{ intelligence:40 } },
+  'Programmer':   { minEdu:5, salary:5000,  requires:{ intelligence:60 } },
+  'Dokter':       { minEdu:5, salary:8000,  requires:{ intelligence:70 } },
+  'Pengacara':    { minEdu:5, salary:7000,  requires:{ intelligence:65 } },
+  'Manajer':      { minEdu:5, salary:6000,  requires:{ intelligence:55, social:50 } },
+  'CEO':          { minEdu:5, salary:15000, requires:{ intelligence:70, social:60 } },
+  'Youtuber':     { minEdu:3, salary:3000,  requires:{ social:50 } },
+  'Atlet':        { minEdu:2, salary:4000,  requires:{ fitness:70 } },
+  'Musisi':       { minEdu:2, salary:2500,  requires:{ social:40 } },
+  'Seniman':      { minEdu:2, salary:1800,  requires:{} }
+};
+
+const STOCKS = {
+  'TECH': { name:'TechCorp', price:100, ownedShares:0, basePrice:100 },
+  'ENRG': { name:'EnergiNusa', price:80, ownedShares:0, basePrice:80 },
+  'BNS':  { name:'BankNusantara', price:120, ownedShares:0, basePrice:120 }
+};
+
+const PROPERTIES = [
+  { id:'apt', name:'Apartemen Subsidi', price:20000,  rent:1500,  icon:'🏠', owned:false },
+  { id:'vila', name:'Vila Mewah',       price:100000, rent:8000,  icon:'🏡', owned:false },
+  { id:'ruko', name:'Ruko Komersial',   price:50000,  rent:4000,  icon:'🏪', owned:false },
+  { id:'gedung', name:'Gedung Perkantoran', price:200000, rent:18000, icon:'🏢', owned:false }
+];
+
+const CRIME_ACTIONS = [
+  { id:'mengutil',  name:'Mengutil Toko',         minAge:10, reward:150,  heat:10, desc:'Ambil barang kecil dari supermarket' },
+  { id:'mencopet',  name:'Mencopet di Komuter',    minAge:13, reward:500,  heat:20, desc:'Copet dompet penumpang kereta' },
+  { id:'scam',      name:'Penipuan Online/Scam',   minAge:16, reward:3000, heat:30, desc:'Jalankan skema penipuan digital' },
+  { id:'bobol',     name:'Membobol Brankas Rumah', minAge:18, reward:9000, heat:45, desc:'Masuk rumah kosong, ambil isi brangkas' }
+];
+
+const POLITICAL_RANKS = [
+  { id:'sipil',    name:'Rakyat Sipil',    cost:0,      minAge:0,  icon:'👤' },
+  { id:'dewan',    name:'Anggota Dewan',   cost:5000,   minAge:21, icon:'🏛️' },
+  { id:'walikota', name:'Walikota',        cost:20000,  minAge:30, icon:'🏙️' },
+  { id:'gubernur', name:'Gubernur',        cost:50000,  minAge:35, icon:'🗺️' },
+  { id:'presiden', name:'Presiden',        cost:150000, minAge:40, icon:'👑' }
+];
+
+const BUSINESS_TYPES = [
+  { id:'gym',       name:'Gym & Fitness Center', icon:'💪', cost:25000,  baseProfit:3000,  desc:'Pusat kebugaran modern' },
+  { id:'datacenter',name:'Data Center',          icon:'💻', cost:80000,  baseProfit:10000, desc:'Layanan cloud & hosting' },
+  { id:'bitcoin',   name:'Tambang Bitcoin',       icon:'₿',  cost:50000,  baseProfit:7000,  desc:'Mining cryptocurrency' },
+  { id:'resto',     name:'Restoran',              icon:'🍜', cost:15000,  baseProfit:2000,  desc:'Warung makan franchise' },
+  { id:'propertidev',name:'Developer Properti',  icon:'🏗️', cost:100000, baseProfit:15000, desc:'Bangun & jual properti' }
+];
+
+const LIFE_EVENTS = [
+  { id:'e1',  minAge:6,  maxAge:10, text:'Kamu menemukan uang $50 di laci meja belajar!', choices:[{text:'Simpan saja 💰', effect:()=>{ G.cash+=50; addLog('Menemukan uang $50!','good'); }}]},
+  { id:'e2',  minAge:10, maxAge:14, text:'Teman sekelas mengajak kamu untuk membolos sekolah. Ikut tidak?', choices:[{text:'Ikut bolos 😈', effect:()=>{ G.stats.happiness+=10; G.stats.intelligence-=5; addLog('Bolos sekolah, kecerdasan turun.','bad'); }},{text:'Tolak, masuk kelas 📚', effect:()=>{ G.stats.intelligence+=5; addLog('Rajin belajar, kecerdasan naik!','good'); }}]},
+  { id:'e3',  minAge:15, maxAge:18, text:'Kamu menemukan dompet berisi $300 di jalan. Apa yang kamu lakukan?', choices:[{text:'Simpan dompetnya 💰', effect:()=>{ G.cash+=300; G.stats.happiness+=5; addLog('Dapat $300 dari dompet temuan.','good'); }},{text:'Kembalikan ke polisi 👮', effect:()=>{ G.stats.social+=15; addLog('Mengembalikan dompet, reputasi sosial naik!','good'); }}]},
+  { id:'e4',  minAge:18, maxAge:30, text:'Sahabatmu mengajak kamu berbisnis kecil-kecilan. Mau investasi $2.000?', choices:[{text:'Investasi $2.000 💼', effect:()=>{ if(G.cash>=2000){ G.cash-=2000; const luck=Math.random(); if(luck>0.5){G.cash+=5000;addLog('Bisnis bareng teman untung $3.000!','good');}else{addLog('Bisnis bangkrut, rugi $2.000 😢','bad');} }else{showNotif('Uang tidak cukup!','warn');} }},{text:'Tolak, terlalu berisiko', effect:()=>{ addLog('Menolak ajakan bisnis.','neutral'); }}]},
+  { id:'e5',  minAge:20, maxAge:35, text:'Kamu mendapat tawaran kerja di luar kota dengan gaji 2x lipat, tapi harus pindah. Mau?', choices:[{text:'Pindah dan ambil tawaran ✈️', effect:()=>{ G.salary=Math.round(G.salary*1.8); G.stats.happiness-=10; addLog('Gaji naik 2x lipat, tapi jauh dari keluarga.','neutral'); }},{text:'Tetap di kota asal 🏠', effect:()=>{ G.stats.happiness+=10; addLog('Tetap di kota asal demi keluarga.','good'); }}]},
+  { id:'e6',  minAge:25, maxAge:45, text:'Atasan menawarkan promosi jabatan dengan tanggung jawab lebih besar. Terima?', choices:[{text:'Terima promosi! 🚀', effect:()=>{ G.salary=Math.round(G.salary*1.3); G.stats.stress+=15; G.careerLevel=(G.careerLevel||0)+1; addLog('Dapat promosi! Gaji naik 30%, tapi lebih stres.','good'); }},{text:'Tolak, cukup posisi ini', effect:()=>{ G.stats.happiness+=10; addLog('Menolak promosi demi keseimbangan hidup.','neutral'); }}]},
+  { id:'e7',  minAge:30, maxAge:60, text:'Kamu jatuh sakit dan harus dirawat di rumah sakit selama seminggu.', choices:[{text:'Rawat inap (biaya $2.000) 🏥', effect:()=>{ if(G.cash>=2000){G.cash-=2000;G.stats.health=Math.min(100,G.stats.health+30);addLog('Sembuh setelah rawat inap.','good');}else{G.stats.health-=20;addLog('Tidak punya biaya berobat, kesehatan menurun.','bad');} }},{text:'Istirahat di rumah saja', effect:()=>{ G.stats.health-=10; addLog('Istirahat di rumah, pemulihan lambat.','neutral'); }}]},
+  { id:'e8',  minAge:35, maxAge:65, text:'Ada peluang emas: investasi properti dengan diskon 30%! Butuh $15.000.', choices:[{text:'Beli properti diskon! 🏠', effect:()=>{ if(G.cash>=15000){G.cash-=15000; const p=PROPERTIES.find(x=>x.id==='apt'); if(p&&!p.owned){p.owned=true;G.ownedProperties.push('apt');addLog('Beli apartemen diskon! Dapat passive income.','good');}else{G.cash+=15000;addLog('Properti sudah dimiliki.','neutral');} }else{addLog('Uang tidak cukup untuk beli properti.','bad');} }},{text:'Tidak sekarang', effect:()=>{ addLog('Melewatkan peluang properti diskon.','neutral'); }}]},
+  { id:'e9',  minAge:18, maxAge:50, text:'Seorang investor asing menawarkan kerjasama bisnis. Butuh modal $5.000.', choices:[{text:'Terima kerjasama 🤝', effect:()=>{ if(G.cash>=5000){G.cash-=5000;const luck=Math.random();if(luck>0.4){const gain=Math.round(5000+Math.random()*15000);G.cash+=gain;addLog(`Investasi bareng asing untung $${gain.toLocaleString()}!`,'good');}else{addLog('Investor asing kabur, rugi $5.000 💸','bad');}}else{showNotif('Modal tidak cukup','warn');} }},{text:'Hati-hati, tolak', effect:()=>{ G.stats.intelligence+=3; addLog('Menolak tawaran mencurigakan.','neutral'); }}]},
+  { id:'e10', minAge:40, maxAge:75, text:'Kamu merasa tubuh mulai menua. Mau beli suplemen premium $500/tahun?', choices:[{text:'Beli suplemen kesehatan 💊', effect:()=>{ if(G.cash>=500){G.cash-=500;G.stats.health=Math.min(100,G.stats.health+15);G.stats.fitness=Math.min(100,G.stats.fitness+10);addLog('Minum suplemen, kesehatan membaik!','good');}else{addLog('Tidak mampu beli suplemen.','neutral');} }},{text:'Hidup sehat secara alami', effect:()=>{ G.stats.fitness=Math.min(100,G.stats.fitness+5); addLog('Olahraga ringan, cukup sehat.','neutral'); }}]},
+  { id:'e11', minAge:18, maxAge:35, text:'Kamu bertemu seseorang yang menarik hati di sebuah acara. Ajak kenalan?', choices:[{text:'Maju duluan kenalan 😊', effect:()=>{ G.stats.social+=10; if(!G.partner){G.partner={name:randomName(G.gender==='Laki-laki'?'Perempuan':'Laki-laki'),age:G.age-Math.floor(Math.random()*5),relation:20};addLog(`Berkenalan dengan ${G.partner.name}!`,'good');}else{addLog('Kenalan baru, tapi sudah punya pasangan.','neutral');} }},{text:'Malu-malu, tidak jadi', effect:()=>{ addLog('Kehilangan kesempatan kenalan.','neutral'); }}]},
+  { id:'e12', minAge:50, maxAge:80, text:'Anak-anak minta uang untuk modal usaha mereka. Mau bantu $3.000?', choices:[{text:'Bantu modal anak 👨‍👩‍👧', effect:()=>{ if(G.cash>=3000){G.cash-=3000;G.familyPrestige=Math.min(100,G.familyPrestige+10);addLog('Bantu modal anak, gengsi keluarga naik!','good');}else{addLog('Tidak punya cukup untuk bantu anak.','bad');} }},{text:'Suruh cari modal sendiri', effect:()=>{ G.stats.happiness-=5; addLog('Menolak bantu anak, hubungan merenggang.','bad'); }}]}
+];
+
+const DRIVING_QUIZZES = [
+  { q:'Rambu segitiga merah dengan tanda seru (!) berarti...', opts:['Dilarang masuk','Hati-hati bahaya','Wajib berhenti','Jalan satu arah'], ans:1 },
+  { q:'Marka jalan garis putih putus-putus di tengah jalan berarti...', opts:['Tidak boleh berpindah jalur','Boleh berpindah jalur jika aman','Hanya untuk pejalan kaki','Jalur bus'], ans:1 },
+  { q:'Berapa batas kecepatan maksimum di dalam kota (jalan biasa)?', opts:['40 km/jam','50 km/jam','60 km/jam','80 km/jam'], ans:2 },
+  { q:'Lampu merah berkelip (flashing) artinya...', opts:['Harus berhenti total','Jalan hati-hati tanpa henti','Boleh langsung belok kanan','Tanda jalan rusak'], ans:1 },
+  { q:'Saat hendak mendahului kendaraan lain, sinyal yang digunakan adalah...', opts:['Lampu hazard','Klakson panjang','Lampu sein kanan','Lampu jauh'], ans:2 }
+];
+
+const NEWS_POOL = {
+  'TECH': [
+    { text:'🤖 TechCorp meluncurkan AI revolusioner, valuasi melesat!', multiplier:1.6 },
+    { text:'💻 TechCorp raih kontrak pemerintah senilai triliunan rupiah!', multiplier:1.4 },
+    { text:'📉 TechCorp digugat atas pelanggaran data pengguna.', multiplier:0.6 },
+    { text:'🔬 TechCorp kembangkan chip kuantum generasi baru.', multiplier:1.35 }
+  ],
+  'ENRG': [
+    { text:'⚡ EnergiNusa temukan ladang minyak baru di Kalimantan!', multiplier:1.5 },
+    { text:'🌿 EnergiNusa pivot ke energi terbarukan, investor antusias.', multiplier:1.3 },
+    { text:'🛢️ Harga minyak global anjlok, EnergiNusa terdampak besar.', multiplier:0.55 },
+    { text:'🌊 EnergiNusa bangun PLTA terbesar di Asia Tenggara.', multiplier:1.45 }
+  ],
+  'BNS': [
+    { text:'🏦 BankNusantara perluas jaringan ke 5 negara ASEAN!', multiplier:1.4 },
+    { text:'💰 Suku bunga acuan BI naik, untungkan BankNusantara.', multiplier:1.25 },
+    { text:'😱 BankNusantara terlibat skandal kredit macet besar!', multiplier:0.5 },
+    { text:'📲 BankNusantara luncurkan super-app yang viral di medsos.', multiplier:1.35 }
+  ]
+};
+
+// ─── ALLOC POINTS ──────────────────────────────────────────────────
+let allocPoints = { happiness:10, intelligence:10, appearance:10, fitness:10 };
+let sisaPoin = 100;
+let selectedTrait = null;
+
+function updateAllocDisplay(){
+  ['happiness','intelligence','appearance','fitness'].forEach(k=>{
+    const el = document.getElementById('alloc-'+k);
+    if(el) el.textContent = allocPoints[k];
+  });
+  const used = Object.values(allocPoints).reduce((a,b)=>a+b,0) - 40;
+  sisaPoin = 100 - used;
+  const el = document.getElementById('poin-sisa');
+  if(el) el.textContent = `Sisa: ${sisaPoin} Poin`;
+}
+
+function allocPoint(stat, delta){
+  const newVal = allocPoints[stat] + delta;
+  if(newVal < 10 || newVal > 100) return;
+  const used = Object.values(allocPoints).reduce((a,b)=>a+b,0) - allocPoints[stat] + newVal - 40;
+  if(delta > 0 && used > 100){ showNotif('Poin atribut habis!','warn'); return; }
+  allocPoints[stat] = newVal;
+  updateAllocDisplay();
+}
+
+function selectTrait(trait){
+  selectedTrait = trait;
+  document.querySelectorAll('.trait-card').forEach(el=>{
+    if(el.dataset.trait === trait){
+      el.style.borderColor = '#007aff';
+      el.style.background = 'rgba(0,122,255,.15)';
+    } else {
+      el.style.borderColor = '#3a3a3c';
+      el.style.background = '#2c2c2e';
+    }
+  });
+}
+
+function randomizeName(){
+  const gender = document.getElementById('c-gender').value;
+  const first = gender === 'Laki-laki' ? pick(MALE_NAMES) : pick(FEMALE_NAMES);
+  const last = pick(LAST_NAMES);
+  document.getElementById('c-name').value = `${first} ${last}`;
+}
+
+function updateCountryInfo(){
+  const c = document.getElementById('c-country').value;
+  const info = COUNTRIES[c];
+  const el = document.getElementById('country-info');
+  if(el) el.textContent = `💰 Mata uang: ${info.currency} · 🏙️ Kota lahir: ${info.birthCity} · 💵 Modal awal: $${info.startMoney.toLocaleString()}`;
+}
+
+// ─── SCREENS ────────────────────────────────────────────────────────
+function showMainMenu(){
+  document.getElementById('main-menu').style.display='flex';
+  document.getElementById('char-customize').style.display='none';
+  document.getElementById('game-container').style.display='none';
+  const hasSave = localStorage.getItem('relife_save_data');
+  document.getElementById('mm-load-btn').style.display = hasSave ? 'block' : 'none';
+}
+
+function showCustomize(){
+  document.getElementById('main-menu').style.display='none';
+  document.getElementById('char-customize').style.display='block';
+  document.getElementById('game-container').style.display='none';
+  updateCountryInfo();
+  updateAllocDisplay();
+  allocPoints = { happiness:10, intelligence:10, appearance:10, fitness:10 };
+  selectedTrait = null;
+  document.querySelectorAll('.trait-card').forEach(el=>{ el.style.borderColor='#3a3a3c'; el.style.background='#2c2c2e'; });
+  updateAllocDisplay();
+}
+
+function showGame(){
+  document.getElementById('main-menu').style.display='none';
+  document.getElementById('char-customize').style.display='none';
+  document.getElementById('game-container').style.display='block';
+  renderAll();
+}
+
+
+// ─── INIT ────────────────────────────────────────────────────────────
+function initGame(cfg){
+  const country = COUNTRIES[cfg.country] || COUNTRIES['Indonesia'];
+  G = {
+    // identity
+    name: cfg.name,
+    gender: cfg.gender,
+    country: cfg.country,
+    birthCity: country.birthCity,
+    flag: country.flag,
+    currency: country.currency,
+    trait: cfg.trait || 'Analytical',
+    passportNum: 'ID-' + Math.floor(Math.random()*9000000+1000000),
+    sexuality: 'Heteroseksual',
+    fashionStyle: 'Kasual',
+    hasSIM: false,
+    hasKTP: true,
+    legalStatus: 'Bebas', // Bebas / Buronan / Di Penjara
+    jailYearsLeft: 0,
+    isAlive: true,
+    age: 0,
+    maxAge: Math.floor(Math.random()*11)+80, // 80-90
+    deathYear: 0,
+
+    // stats (0-100)
+    stats: {
+      happiness: Math.min(100, cfg.allocPoints.happiness),
+      intelligence: Math.min(100, cfg.allocPoints.intelligence),
+      appearance: Math.min(100, cfg.allocPoints.appearance),
+      fitness: Math.min(100, cfg.allocPoints.fitness),
+      social: 40,
+      health: 90,
+      stress: 10,
+      musical: cfg.trait==='Creative'?75:20,
+      painting: cfg.trait==='Creative'?75:15
+    },
+
+    // finance
+    cash: country.startMoney,
+    bankBalance: 0,
+    bankDebt: 0,
+    loanMonthly: 0,
+    illicitCash: 0,
+    salary: 0,
+    annualExpense: 2000,
+    inflationRate: 0.02,
+
+    // career
+    educationLevel: 0,
+    job: 'Pengangguran',
+    jobYears: 0,
+    careerLevel: 0,
+    isStudying: false,
+    studyYearsLeft: 0,
+    studyTarget: 0,
+    hobbies: [],
+
+    // criminal
+    heat: 0,
+    criminalRep: 0,
+    totalCrimes: 0,
+
+    // politics
+    politicalRank: 0,
+    approvalRate: 50,
+    partySupport: 30,
+    treasury: 0,
+
+    // family
+    fatherName: randomName('Laki-laki'),
+    motherName: randomName('Perempuan'),
+    fatherAge: Math.floor(Math.random()*10+22)+0,
+    motherAge: Math.floor(Math.random()*8+20)+0,
+    fatherRelation: 70,
+    motherRelation: 70,
+    familyPrestige: 20,
+    partner: null,
+    children: [],
+    marriageYear: null,
+    generation: 1,
+
+    // assets
+    stocks: JSON.parse(JSON.stringify(STOCKS)),
+    ownedProperties: [],
+    businesses: [],
+    businessCashflowStreak: {},
+
+    // log
+    lifeLog: [],
+    newsLog: [],
+    stockNextMultiplier: { TECH:1, ENRG:1, BNS:1 },
+
+    // misc
+    savedAt: null,
+    usedEventIds: new Set()
+  };
+
+  // Apply trait buffs
+  if(cfg.trait === 'Athletic'){
+    G.stats.fitness = Math.min(100, G.stats.fitness + 20);
+  }
+
+  addLog(`🎉 Lahir di ${G.birthCity}, ${G.country}. Selamat datang di dunia, ${G.name}!`, 'good');
+  addLog(`✨ Sifat bawaan: ${G.trait}`, 'neutral');
+  saveProgress();
+  showGame();
+}
+
+function startRandom(){
+  const gender = Math.random()>0.5 ? 'Laki-laki' : 'Perempuan';
+  const countryKeys = Object.keys(COUNTRIES);
+  const country = pick(countryKeys);
+  const traits = ['Analytical','Creative','Athletic'];
+  const alloc = {
+    happiness: rnd(40,70),
+    intelligence: rnd(40,70),
+    appearance: rnd(40,70),
+    fitness: rnd(40,70)
+  };
+  initGame({
+    name: randomName(gender),
+    gender, country,
+    trait: pick(traits),
+    allocPoints: alloc
+  });
+}
+
+function spawnCharacter(){
+  const name = document.getElementById('c-name').value.trim();
+  if(!name){ showNotif('Nama tidak boleh kosong!','warn'); return; }
+  if(!selectedTrait){ showNotif('Pilih sifat bawaan terlebih dahulu!','warn'); return; }
+  const gender = document.getElementById('c-gender').value;
+  const country = document.getElementById('c-country').value;
+  initGame({ name, gender, country, trait:selectedTrait, allocPoints:{...allocPoints} });
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function clamp(v,min=0,max=100){ return Math.max(min,Math.min(max,v)); }
+function fmtMoney(n){ return '$'+Number(n).toLocaleString('id-ID'); }
+
+function randomName(gender){
+  const first = gender==='Laki-laki' ? pick(MALE_NAMES) : pick(FEMALE_NAMES);
+  return `${first} ${pick(LAST_NAMES)}`;
+}
+
+function addLog(msg, type='neutral'){
+  const el = { text:msg, type, age:G.age };
+  G.lifeLog.unshift(el);
+  if(G.lifeLog.length > 100) G.lifeLog = G.lifeLog.slice(0,100);
+  renderLog();
+}
+
+function showNotif(msg, type='info'){
+  const area = document.getElementById('notif-area');
+  const div = document.createElement('div');
+  div.className = `notification notif-${type}`;
+  div.innerHTML = `<div style="font-weight:600;font-size:13px;">${msg}</div>`;
+  area.appendChild(div);
+  setTimeout(()=>{ div.style.animation='slideOut .3s ease forwards'; setTimeout(()=>div.remove(),300); }, 3000);
+}
+
+function switchTab(tab){
+  document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(el=>el.classList.remove('active'));
+  const tabEl = document.getElementById('tab-'+tab);
+  if(tabEl) tabEl.classList.add('active');
+  document.querySelectorAll(`.nav-tab[data-tab="${tab}"]`).forEach(el=>el.classList.add('active'));
+  renderTabContent(tab);
+}
+
+function renderTabContent(tab){
+  if(tab==='profil') { renderStats(); renderCharInfo(); renderLog(); renderActions(); }
+  else if(tab==='keluarga') renderFamily();
+  else if(tab==='internet') { document.getElementById('browser-page-content').innerHTML=''; }
+  else if(tab==='karir') renderCareer();
+  else if(tab==='politik') renderPolitik();
+  else if(tab==='kriminal') renderKriminal();
+  else if(tab==='aset') renderAset();
+  else if(tab==='bank') renderBank();
+}
+
+// ─── SAVE / LOAD ─────────────────────────────────────────────────────
+function saveProgress(){
+  if(!G || !G.name) return;
+  const data = { ...G, usedEventIds: [...G.usedEventIds], savedAt: new Date().toISOString() };
+  localStorage.setItem('relife_save_data', JSON.stringify(data));
+  G.savedAt = data.savedAt;
+}
+
+function loadGame(){
+  const raw = localStorage.getItem('relife_save_data');
+  if(!raw){ showNotif('Tidak ada data tersimpan.','warn'); return; }
+  try {
+    const data = JSON.parse(raw);
+    G = data;
+    G.usedEventIds = new Set(data.usedEventIds || []);
+    if(!G.stocks) G.stocks = JSON.parse(JSON.stringify(STOCKS));
+    if(!G.ownedProperties) G.ownedProperties = [];
+    if(!G.businesses) G.businesses = [];
+    if(!G.newsLog) G.newsLog = [];
+    if(!G.stockNextMultiplier) G.stockNextMultiplier = { TECH:1, ENRG:1, BNS:1 };
+    if(!G.businessCashflowStreak) G.businessCashflowStreak = {};
+    showGame();
+    showNotif(`Game dimuat! ${G.name}, usia ${G.age} tahun 💾`,'info');
+  } catch(e) {
+    showNotif('Gagal memuat data. Data mungkin rusak.','warn');
+  }
+}
+
+function clearSave(){
+  localStorage.removeItem('relife_save_data');
+  showNotif('Data tersimpan dihapus.','info');
+}
+
+function showOptions(){
+  openModal(`
+    <h3 style="font-size:18px; font-weight:800; margin-bottom:16px;">⚙️ Opsi & Save</h3>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button class="btn-blue" onclick="saveProgress(); showNotif('Game disimpan! 💾','info'); closeModal();">💾 Simpan Game</button>
+      <button class="btn-gray" onclick="closeModal(); loadGame();">📂 Muat Game</button>
+      <button class="btn-gray" onclick="clearSave(); closeModal();">🗑️ Hapus Data Tersimpan</button>
+      <button class="btn-red" onclick="closeModal(); confirmNewGame();">🔄 Mulai Game Baru</button>
+      <div style="font-size:12px; color:#8e8e93; margin-top:8px; padding:10px; background:#2c2c2e; border-radius:8px;">
+        ${G.savedAt ? `Terakhir disimpan: ${new Date(G.savedAt).toLocaleString('id-ID')}` : 'Belum ada data tersimpan'}
+      </div>
+    </div>
+    <button class="btn-gray" style="width:100%; margin-top:12px;" onclick="closeModal()">Tutup</button>
+  `);
+}
+
+function confirmNewGame(){
+  openModal(`
+    <h3 style="font-size:18px; font-weight:800; margin-bottom:12px;">🔄 Mulai Baru?</h3>
+    <p style="color:#8e8e93; font-size:14px; margin-bottom:20px;">Semua progress akan hilang. Yakin ingin memulai game baru?</p>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-red" style="flex:1;" onclick="clearSave(); closeModal(); showMainMenu();">Ya, Mulai Baru</button>
+      <button class="btn-gray" style="flex:1;" onclick="closeModal()">Batal</button>
+    </div>
+  `);
+}
+
+
+// ─── RENDER HUD ───────────────────────────────────────────────────────
+function renderHUD(){
+  if(!G || !G.name) return;
+  const jobSalary = G.salary > 0 ? ` · ${fmtMoney(G.salary)}/thn` : '';
+  document.getElementById('hud-flag').textContent = G.flag;
+  document.getElementById('hud-name').textContent = G.name;
+  document.getElementById('hud-age').textContent = `${G.age} tahun · ${G.gender} · ${G.country}`;
+  document.getElementById('hud-cash').textContent = fmtMoney(G.cash);
+  document.getElementById('hud-job').textContent = G.job + jobSalary;
+}
+
+function renderAll(){
+  renderHUD();
+  renderStats();
+  renderCharInfo();
+  renderLog();
+  renderActions();
+  renderFamily();
+  renderCareer();
+  renderPolitik();
+  renderKriminal();
+  renderAset();
+  renderBank();
+}
+
+// ─── CIRCULAR STATS ──────────────────────────────────────────────────
+function makeCircle(val, color, label, icon){
+  const pct = clamp(val);
+  const circumference = 2 * Math.PI * 15.9155;
+  const offset = circumference - (pct/100)*circumference;
+  return `
+  <div style="display:flex; flex-direction:column; align-items:center;">
+    <svg class="circular-chart" viewBox="0 0 36 36">
+      <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+      <path class="circle" stroke="${color}" stroke-dasharray="${pct}, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+      <text x="18" y="20.35" text-anchor="middle" font-size="8" fill="#fff" font-weight="700">${pct}%</text>
+    </svg>
+    <div style="font-size:11px; color:#8e8e93; margin-top:2px;">${icon} ${label}</div>
+  </div>`;
+}
+
+function renderStats(){
+  const s = G.stats;
+  const container = document.getElementById('stats-circles');
+  if(!container) return;
+  container.innerHTML = `
+    ${makeCircle(s.happiness,'#2ecc71','Bahagia','😊')}
+    ${makeCircle(s.intelligence,'#007aff','Cerdas','🧠')}
+    ${makeCircle(s.appearance,'#ff9f0a','Tampilan','✨')}
+    ${makeCircle(s.fitness,'#ff3b30','Bugar','🏃')}
+    ${makeCircle(s.social,'#af52de','Sosial','👥')}
+    ${makeCircle(s.health,'#34c759','Kesehatan','❤️')}
+    ${makeCircle(s.stress,'#ff2d55','Stres','😤')}
+    ${makeCircle(s.musical,'#5856d6','Musik','🎵')}
+  `;
+  const badge = document.getElementById('profil-trait-badge');
+  if(badge) badge.textContent = G.trait;
+}
+
+// ─── CHAR INFO ─────────────────────────────────────────────────────
+function renderCharInfo(){
+  const el = document.getElementById('char-info-grid');
+  if(!el) return;
+  const ageLabel = G.isAlive ? `${G.age} tahun` : `${G.age} tahun (✝)`;
+  el.innerHTML = `
+    <div style="background:#2c2c2e; padding:10px; border-radius:8px;">
+      <div style="color:#8e8e93; font-size:11px;">Nama</div>
+      <div style="font-weight:700; margin-top:2px;">${G.name}</div>
+    </div>
+    <div style="background:#2c2c2e; padding:10px; border-radius:8px;">
+      <div style="color:#8e8e93; font-size:11px;">Usia</div>
+      <div style="font-weight:700; margin-top:2px;">${ageLabel}</div>
+    </div>
+    <div style="background:#2c2c2e; padding:10px; border-radius:8px;">
+      <div style="color:#8e8e93; font-size:11px;">Status</div>
+      <div style="font-weight:700; margin-top:2px; color:${G.legalStatus==='Bebas'?'#2ecc71':G.legalStatus==='Di Penjara'?'#ff3b30':'#ff9f0a'}">${G.legalStatus}</div>
+    </div>
+    <div style="background:#2c2c2e; padding:10px; border-radius:8px;">
+      <div style="color:#8e8e93; font-size:11px;">Pendidikan</div>
+      <div style="font-weight:700; margin-top:2px;">${EDUCATION_LEVELS[G.educationLevel]}</div>
+    </div>
+    <div style="background:#2c2c2e; padding:10px; border-radius:8px;">
+      <div style="color:#8e8e93; font-size:11px;">Pekerjaan</div>
+      <div style="font-weight:700; margin-top:2px;">${G.job}</div>
+    </div>
+    <div style="background:#2c2c2e; padding:10px; border-radius:8px;">
+      <div style="color:#8e8e93; font-size:11px;">Seksualitas</div>
+      <div style="font-weight:700; margin-top:2px;">${G.sexuality}</div>
+    </div>
+    <div style="background:#2c2c2e; padding:10px; border-radius:8px;">
+      <div style="color:#8e8e93; font-size:11px;">Gaya Pakaian</div>
+      <div style="font-weight:700; margin-top:2px;">${G.fashionStyle}</div>
+    </div>
+    <div style="background:#2c2c2e; padding:10px; border-radius:8px;">
+      <div style="color:#8e8e93; font-size:11px;">SIM</div>
+      <div style="font-weight:700; margin-top:2px; color:${G.hasSIM?'#2ecc71':'#ff3b30'}">${G.hasSIM?'✅ Punya':'❌ Belum'}</div>
+    </div>
+  `;
+}
+
+// ─── LOG ──────────────────────────────────────────────────────────────
+function renderLog(){
+  const el = document.getElementById('life-log');
+  if(!el) return;
+  if(G.lifeLog.length === 0){
+    el.innerHTML = '<div style="color:#8e8e93; font-size:13px; text-align:center; padding:20px;">Belum ada catatan kehidupan.</div>';
+    return;
+  }
+  el.innerHTML = G.lifeLog.slice(0,50).map(l=>`
+    <div class="log-item ${l.type}">
+      <span style="color:#8e8e93; font-size:11px;">Usia ${l.age}:</span> ${l.text}
+    </div>
+  `).join('');
+}
+
+function clearLog(){ G.lifeLog = []; renderLog(); }
+
+// ─── ACTIONS ──────────────────────────────────────────────────────────
+function renderActions(){
+  const btn = document.getElementById('btn-sexuality');
+  if(btn) btn.style.display = G.age >= 12 ? 'block' : 'none';
+}
+
+
+// ─── NEXT YEAR (CORE LOOP) ────────────────────────────────────────────
+function nextYear(){
+  if(!G.isAlive){ showNotif('Karakter sudah meninggal.','warn'); return; }
+
+  G.age++;
+
+  // Jail logic
+  if(G.legalStatus === 'Di Penjara'){
+    if(G.jailYearsLeft > 0){
+      G.jailYearsLeft--;
+      addLog(`😔 Tahun ke-${3-G.jailYearsLeft} di penjara. Sisa ${G.jailYearsLeft} tahun.`,'bad');
+      G.stats.happiness = clamp(G.stats.happiness - 10);
+      if(G.jailYearsLeft <= 0){
+        G.legalStatus = 'Bebas';
+        addLog('🎉 Bebas dari penjara! Kembali ke masyarakat.','good');
+      }
+    }
+    saveProgress();
+    renderAll();
+    return;
+  }
+
+  // Parents age
+  G.fatherAge++;
+  G.motherAge++;
+  if(G.fatherAge > 85 && Math.random() < 0.15){ addLog('💔 Ayah berpulang ke rahmatullah. Semoga tenang.','bad'); G.fatherAge = -1; G.familyPrestige = clamp(G.familyPrestige - 5); }
+  if(G.motherAge > 80 && Math.random() < 0.12){ addLog('💔 Ibu berpulang ke rahmatullah. Semoga tenang.','bad'); G.motherAge = -1; G.familyPrestige = clamp(G.familyPrestige - 5); }
+
+  // Study progress
+  if(G.isStudying){
+    G.studyYearsLeft--;
+    addLog(`📚 Masih menempuh ${EDUCATION_LEVELS[G.studyTarget]}... Sisa ${G.studyYearsLeft} tahun.`,'neutral');
+    if(G.studyYearsLeft <= 0){
+      G.isStudying = false;
+      G.educationLevel = G.studyTarget;
+      const intBonus = G.trait==='Analytical' ? Math.round(5*1.2) : 5;
+      G.stats.intelligence = clamp(G.stats.intelligence + intBonus);
+      addLog(`🎓 Selesai menempuh ${EDUCATION_LEVELS[G.educationLevel]}! Kecerdasan +${intBonus}%`,'good');
+    }
+  }
+
+  // Hobby effects
+  if(G.hobbies.includes('gym')){ G.cash -= 50; G.stats.fitness = clamp(G.stats.fitness+3); G.stats.health = clamp(G.stats.health+2); }
+  if(G.hobbies.includes('billiard')){ G.cash -= 100; G.stats.social = clamp(G.stats.social+4); G.stats.stress = clamp(G.stats.stress-5); }
+  if(G.hobbies.includes('coding')){ G.cash -= 300; const intGain = G.trait==='Analytical'?Math.round(5*1.2):5; G.stats.intelligence = clamp(G.stats.intelligence+intGain); }
+
+  // Salary income
+  if(G.salary > 0){ G.cash += G.salary; }
+
+  // Business income
+  G.businesses.forEach(biz=>{
+    const wageEffect = biz.wage < 3000 ? 0.7 : biz.wage < 5000 ? 0.85 : 1;
+    const adEffect = biz.adBudget >= 2000 ? 1.2 : biz.adBudget >= 500 ? 1.05 : 0.9;
+    const profit = Math.round(biz.baseProfit * wageEffect * adEffect);
+    const netProfit = profit - biz.wage - biz.adBudget;
+    G.cash += netProfit;
+    biz.totalProfit = (biz.totalProfit||0) + netProfit;
+    if(netProfit < 0){
+      biz.lossStreak = (biz.lossStreak||0) + 1;
+      addLog(`📉 ${biz.name} merugi ${fmtMoney(Math.abs(netProfit))} tahun ini.`,'bad');
+    } else {
+      biz.lossStreak = 0;
+      addLog(`💼 ${biz.name} menghasilkan ${fmtMoney(netProfit)} tahun ini.`,'good');
+    }
+    if(biz.lossStreak >= 3){
+      addLog(`🏚️ ${biz.name} BANGKRUT setelah 3 tahun merugi! Aset disita.`,'bad');
+      G.businesses = G.businesses.filter(b=>b.id!==biz.id);
+    }
+  });
+
+  // Property rental income
+  G.ownedProperties.forEach(pid=>{
+    const p = PROPERTIES.find(x=>x.id===pid);
+    if(p){ G.cash += p.rent; addLog(`🏠 Sewa ${p.name}: +${fmtMoney(p.rent)}`,'good'); }
+  });
+
+  // Stock annual update
+  updateStocksAnnually();
+
+  // Expenses & inflation
+  G.annualExpense = Math.round(G.annualExpense * (1 + G.inflationRate));
+  G.cash -= G.annualExpense;
+
+  // Loan payment
+  if(G.loanMonthly > 0){ G.cash -= G.loanMonthly * 12; }
+
+  // Income tax
+  const taxRate = G.businesses.length > 0 ? 0.25 : 0.10;
+  if(G.salary > 0){ const tax = Math.round(G.salary * taxRate); G.cash -= tax; if(tax>0) addLog(`💸 Pajak penghasilan: ${fmtMoney(tax)} (${taxRate*100}%)`,'warning'); }
+
+  // Political income
+  if(G.politicalRank > 0){
+    const polSalary = [0,2000,8000,20000,50000][G.politicalRank] || 0;
+    G.cash += polSalary;
+    addLog(`🏛️ Gaji jabatan politik: +${fmtMoney(polSalary)}`,'good');
+  }
+
+  // Stress from cashflow
+  if(G.cash < 0){ G.stats.stress = clamp(G.stats.stress + 15); G.stats.happiness = clamp(G.stats.happiness - 10); addLog('😰 Cashflow minus! Stres meningkat.','bad'); }
+
+  // Heat decay
+  if(G.heat > 0){ G.heat = clamp(G.heat - 5); }
+
+  // Stress effects
+  if(G.stats.stress > 80){ G.stats.health = clamp(G.stats.health - 10); addLog('😰 Stres sangat tinggi! Kesehatan menurun -10%','bad'); }
+
+  // Natural health decay (aging)
+  if(G.age > 50){ const decay = Math.floor((G.age-50)/10)+1; G.stats.health = clamp(G.stats.health - decay); }
+  if(G.age > 40){ G.stats.fitness = clamp(G.stats.fitness - 1); }
+
+  // Happiness drift
+  if(G.partner){ G.stats.happiness = clamp(G.stats.happiness + 5); }
+  G.stats.happiness = clamp(G.stats.happiness - 2 + (Math.random()>0.5?1:0));
+
+  // Life events (45% chance)
+  if(Math.random() < 0.45){ triggerRandomEvent(); }
+
+  // Check death
+  if(G.stats.health <= 0 || G.age >= G.maxAge){ triggerDeath(); return; }
+
+  saveProgress();
+  renderAll();
+}
+
+// ─── STOCKS ────────────────────────────────────────────────────────────
+function updateStocksAnnually(){
+  ['TECH','ENRG','BNS'].forEach(ticker=>{
+    const news = pick(NEWS_POOL[ticker]);
+    G.newsLog.unshift({ ticker, text: news.text, year: G.age });
+    if(G.newsLog.length > 30) G.newsLog = G.newsLog.slice(0,30);
+
+    const mult = G.stockNextMultiplier[ticker] * (0.85 + Math.random()*0.5);
+    G.stocks[ticker].price = Math.round(G.stocks[ticker].price * mult);
+    G.stocks[ticker].price = Math.max(10, G.stocks[ticker].price);
+
+    G.stockNextMultiplier[ticker] = news.multiplier;
+    addLog(`📰 ${news.text}`, 'neutral');
+  });
+}
+
+
+// ─── LIFE EVENTS ──────────────────────────────────────────────────────
+function triggerRandomEvent(){
+  const eligible = LIFE_EVENTS.filter(e=>
+    G.age >= e.minAge && G.age <= e.maxAge && !G.usedEventIds.has(e.id)
+  );
+  if(eligible.length === 0) return;
+  const ev = pick(eligible);
+  G.usedEventIds.add(ev.id);
+
+  const choicesHtml = ev.choices.map((c,i)=>`
+    <button class="event-choice-btn" onclick="pickEventChoice(${i})">${c.text}</button>
+  `).join('');
+
+  openModal(`
+    <div style="text-align:center; margin-bottom:16px;">
+      <div style="font-size:32px; margin-bottom:8px;">🎲</div>
+      <div style="font-size:11px; color:#8e8e93; margin-bottom:6px;">PERISTIWA HIDUP — Usia ${G.age} Tahun</div>
+      <p style="font-size:16px; font-weight:600; line-height:1.5;">${ev.text}</p>
+    </div>
+    <div id="event-choices">${choicesHtml}</div>
+  `, false);
+
+  window._currentEventChoices = ev.choices;
+}
+
+function pickEventChoice(idx){
+  if(window._currentEventChoices && window._currentEventChoices[idx]){
+    window._currentEventChoices[idx].effect();
+  }
+  closeModal();
+  renderAll();
+}
+
+// ─── DEATH ────────────────────────────────────────────────────────────
+function triggerDeath(){
+  G.isAlive = false;
+  G.deathYear = G.age;
+  const cause = G.stats.health <= 0 ? 'Sakit parah' : 'Usia tua';
+
+  let netWorth = calcNetWorth();
+  const hasHeir = G.children.length > 0;
+
+  const continueBtn = hasHeir ? `<button class="btn-green" style="width:100%;" onclick="continueAsChild()">👶 Lanjutkan Hidup Sebagai Anak</button>` : '';
+
+  openModal(`
+    <div style="text-align:center; margin-bottom:20px;">
+      <div style="font-size:48px; margin-bottom:8px;">⚰️</div>
+      <h2 style="font-size:22px; font-weight:900; color:#ff3b30; margin-bottom:4px;">${G.name} Telah Tiada</h2>
+      <p style="color:#8e8e93; font-size:13px;">Meninggal pada usia ${G.age} tahun · Penyebab: ${cause}</p>
+    </div>
+    <div style="background:#2c2c2e; border-radius:12px; padding:16px; margin-bottom:16px;">
+      <p class="sub-section">Rangkuman Kehidupan</p>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; font-size:13px;">
+        <div style="background:#1c1c1e; padding:10px; border-radius:8px;"><div style="color:#8e8e93;font-size:11px;">Pekerjaan Terakhir</div><div style="font-weight:700;">${G.job}</div></div>
+        <div style="background:#1c1c1e; padding:10px; border-radius:8px;"><div style="color:#8e8e93;font-size:11px;">Pendidikan</div><div style="font-weight:700;">${EDUCATION_LEVELS[G.educationLevel]}</div></div>
+        <div style="background:#1c1c1e; padding:10px; border-radius:8px;"><div style="color:#8e8e93;font-size:11px;">Net Worth</div><div style="font-weight:700; color:#2ecc71;">${fmtMoney(netWorth)}</div></div>
+        <div style="background:#1c1c1e; padding:10px; border-radius:8px;"><div style="color:#8e8e93;font-size:11px;">Pasangan</div><div style="font-weight:700;">${G.partner ? G.partner.name : 'Tidak ada'}</div></div>
+        <div style="background:#1c1c1e; padding:10px; border-radius:8px;"><div style="color:#8e8e93;font-size:11px;">Anak</div><div style="font-weight:700;">${G.children.length} orang</div></div>
+        <div style="background:#1c1c1e; padding:10px; border-radius:8px;"><div style="color:#8e8e93;font-size:11px;">Generasi</div><div style="font-weight:700;">${G.generation}</div></div>
+      </div>
+    </div>
+    ${hasHeir ? `<p style="font-size:13px; color:#2ecc71; text-align:center; margin-bottom:12px;">🎉 Kamu memiliki penerus! Warisan senilai ${fmtMoney(netWorth)} akan diteruskan.</p>` : ''}
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      ${continueBtn}
+      <button class="btn-gray" style="width:100%;" onclick="closeModal(); showMainMenu(); clearSave();">🔄 Mulai Kehidupan Baru</button>
+    </div>
+  `, false);
+}
+
+function continueAsChild(){
+  const child = G.children.length > 0 ? G.children[0] : null;
+  const inheritedCash = G.cash > 0 ? G.cash : 0;
+  const inheritedBusinesses = [...G.businesses];
+  const inheritedProperties = [...G.ownedProperties];
+  const prevGen = G.generation;
+  const prevName = G.name;
+
+  G.cash = inheritedCash;
+  G.age = 18;
+  G.isAlive = true;
+  G.maxAge = rnd(80,90);
+  G.name = child ? child.name : randomName(Math.random()>0.5?'Laki-laki':'Perempuan');
+  G.gender = child ? child.gender : (Math.random()>0.5?'Laki-laki':'Perempuan');
+  G.businesses = inheritedBusinesses;
+  G.ownedProperties = inheritedProperties;
+  G.generation = prevGen + 1;
+  G.legalStatus = 'Bebas';
+  G.heat = 0;
+  G.jailYearsLeft = 0;
+  G.salary = 0;
+  G.job = 'Pengangguran';
+  G.educationLevel = 2;
+  G.isStudying = false;
+  G.partner = null;
+  G.children = [];
+  G.stats = { happiness:70, intelligence:50, appearance:55, fitness:65, social:40, health:100, stress:5, musical:20, painting:15 };
+  G.fatherName = prevName;
+  G.fatherAge = G.age + rnd(22,30);
+  G.motherAge = G.age + rnd(20,28);
+  G.lifeLog = [];
+  G.usedEventIds = new Set();
+
+  addLog(`🌱 Generasi ${G.generation}: ${G.name} lahir dan mewarisi kekayaan dari ${prevName}.`,'good');
+  addLog(`💰 Warisan yang diterima: ${fmtMoney(inheritedCash)}`,'good');
+
+  closeModal();
+  saveProgress();
+  renderAll();
+  showNotif(`Selamat datang, ${G.name}! Generasi ke-${G.generation} 🎉`,'info');
+}
+
+function confirmEndLife(){
+  openModal(`
+    <h3 style="font-size:18px; font-weight:800; margin-bottom:12px; color:#ff3b30;">💀 Akhiri Hidup?</h3>
+    <p style="color:#8e8e93; font-size:14px; margin-bottom:20px;">Kamu yakin ingin mengakhiri permainan sekarang? Rangkuman hidup akan ditampilkan.</p>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-red" style="flex:1;" onclick="closeModal(); G.stats.health=0; triggerDeath();">Ya, Akhiri</button>
+      <button class="btn-gray" style="flex:1;" onclick="closeModal()">Batal</button>
+    </div>
+  `);
+}
+
+// ─── NET WORTH ──────────────────────────────────────────────────────
+function calcNetWorth(){
+  let nw = G.cash + G.bankBalance;
+  ['TECH','ENRG','BNS'].forEach(t=>{ nw += G.stocks[t].price * G.stocks[t].ownedShares; });
+  G.ownedProperties.forEach(pid=>{ const p=PROPERTIES.find(x=>x.id===pid); if(p) nw+=p.price; });
+  G.businesses.forEach(b=>{ nw+=b.cost; });
+  nw -= G.bankDebt;
+  return nw;
+}
+
+function calcAnnualCashflow(){
+  let cf = G.salary;
+  G.businesses.forEach(b=>{ cf += b.baseProfit - b.wage - b.adBudget; });
+  G.ownedProperties.forEach(pid=>{ const p=PROPERTIES.find(x=>x.id===pid); if(p) cf+=p.rent; });
+  if(G.politicalRank>0) cf += [0,2000,8000,20000,50000][G.politicalRank]||0;
+  cf -= G.annualExpense;
+  cf -= G.loanMonthly*12;
+  const taxRate = G.businesses.length>0?0.25:0.10;
+  if(G.salary>0) cf -= Math.round(G.salary*taxRate);
+  return cf;
+}
+
+
+// ─── FAMILY TAB ───────────────────────────────────────────────────────
+function renderFamily(){
+  renderFamilyTree();
+  renderRomance();
+  renderChildren();
+}
+
+function renderFamilyTree(){
+  const el = document.getElementById('family-tree-container');
+  if(!el) return;
+  document.getElementById('family-prestige-val').textContent = `${G.familyPrestige}/100`;
+
+  const fatherAlive = G.fatherAge > 0;
+  const motherAlive = G.motherAge > 0;
+
+  el.innerHTML = `
+    <div style="display:flex; justify-content:center; gap:20px; margin-bottom:8px;">
+      <div class="tree-node" onclick="interactParent('father')" style="${!fatherAlive?'opacity:.5;':''}">
+        <div style="font-size:20px; margin-bottom:4px;">👨</div>
+        <div style="font-weight:700; font-size:13px;">${G.fatherName}</div>
+        <div style="font-size:11px; color:#8e8e93;">${fatherAlive?G.fatherAge+' tahun':'Almarhum'}</div>
+        <div style="margin-top:4px;"><span class="badge ${G.fatherRelation>60?'badge-green':'badge-yellow'}">${G.fatherRelation}% dekat</span></div>
+      </div>
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
+        <div style="font-size:18px;">💍</div>
+      </div>
+      <div class="tree-node" onclick="interactParent('mother')" style="${!motherAlive?'opacity:.5;':''}">
+        <div style="font-size:20px; margin-bottom:4px;">👩</div>
+        <div style="font-weight:700; font-size:13px;">${G.motherName}</div>
+        <div style="font-size:11px; color:#8e8e93;">${motherAlive?G.motherAge+' tahun':'Almarhuma'}</div>
+        <div style="margin-top:4px;"><span class="badge ${G.motherRelation>60?'badge-green':'badge-yellow'}">${G.motherRelation}% dekat</span></div>
+      </div>
+    </div>
+    <div style="display:flex; justify-content:center;"><div class="tree-line"></div></div>
+    <div style="display:flex; justify-content:center;">
+      <div class="tree-node" style="border-color:#007aff; min-width:160px;">
+        <div style="font-size:20px; margin-bottom:4px;">${G.gender==='Laki-laki'?'👦':'👧'}</div>
+        <div style="font-weight:800; font-size:14px; color:#007aff;">${G.name}</div>
+        <div style="font-size:11px; color:#8e8e93;">${G.age} tahun · Pemain</div>
+        <div style="font-size:11px; color:#2ecc71; margin-top:2px;">Gen. ${G.generation}</div>
+      </div>
+    </div>
+    ${G.partner ? `
+    <div style="display:flex; justify-content:center; margin-top:8px; gap:8px; align-items:center;">
+      <div class="tree-line" style="height:20px;"></div>
+    </div>
+    <div style="display:flex; justify-content:center; gap:10px;">
+      <div class="tree-node" style="border-color:#ff9f0a;">
+        <div style="font-size:20px; margin-bottom:4px;">${G.gender==='Laki-laki'?'👩':'👨'}</div>
+        <div style="font-weight:700; font-size:13px;">${G.partner.name}</div>
+        <div style="font-size:11px; color:#8e8e93;">${G.partner.age} tahun · Pasangan</div>
+        <div style="margin-top:4px;"><span class="badge badge-yellow">${G.partner.relation}% cinta</span></div>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+function interactParent(type){
+  const name = type==='father' ? G.fatherName : G.motherName;
+  const alive = type==='father' ? G.fatherAge>0 : G.motherAge>0;
+  if(!alive){ showNotif(`${name} sudah tidak ada. 🕊️`,'info'); return; }
+  const relation = type==='father' ? G.fatherRelation : G.motherRelation;
+
+  openModal(`
+    <div style="text-align:center; margin-bottom:16px;">
+      <div style="font-size:36px; margin-bottom:6px;">${type==='father'?'👨':'👩'}</div>
+      <h3 style="font-size:18px; font-weight:800;">${name}</h3>
+      <p style="font-size:13px; color:#8e8e93; margin-top:4px;">Tingkat kedekatan: ${relation}%</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <button class="btn-blue" onclick="chatParent('${type}')">💬 Ajak Ngobrol (+10 kedekatan)</button>
+      <button class="btn-yellow" onclick="askAllowance('${type}')">💰 Minta Uang Saku (Peluang: ${Math.round(relation/2)}%)</button>
+    </div>
+    <button class="btn-gray" style="width:100%; margin-top:10px;" onclick="closeModal()">Tutup</button>
+  `);
+}
+
+function chatParent(type){
+  if(type==='father') G.fatherRelation=clamp(G.fatherRelation+10);
+  else G.motherRelation=clamp(G.motherRelation+10);
+  G.stats.happiness=clamp(G.stats.happiness+5);
+  const name = type==='father' ? G.fatherName : G.motherName;
+  addLog(`💬 Ngobrol seru bareng ${name}. Kedekatan meningkat!`,'good');
+  closeModal();
+  renderFamily();
+  saveProgress();
+}
+
+function askAllowance(type){
+  const rel = type==='father' ? G.fatherRelation : G.motherRelation;
+  const name = type==='father' ? G.fatherName : G.motherName;
+  const chance = rel/2/100;
+  if(Math.random() < chance){
+    const amount = rnd(50,200);
+    G.cash += amount;
+    addLog(`💰 ${name} memberi uang saku ${fmtMoney(amount)}!`,'good');
+    showNotif(`Dapat uang saku ${fmtMoney(amount)} dari ${name}! 💰`,'info');
+  } else {
+    if(type==='father') G.fatherRelation=clamp(G.fatherRelation-5);
+    else G.motherRelation=clamp(G.motherRelation-5);
+    addLog(`😔 ${name} menolak memberikan uang saku.`,'neutral');
+    showNotif(`${name} tidak bisa memberi uang saku kali ini.`,'warn');
+  }
+  closeModal();
+  renderFamily();
+  saveProgress();
+}
+
+function renderRomance(){
+  const el = document.getElementById('romance-section');
+  if(!el) return;
+  if(!G.partner){
+    const canDate = G.age >= 16;
+    el.innerHTML = `
+      <p style="color:#8e8e93; font-size:13px; margin-bottom:12px;">Kamu belum memiliki pasangan.</p>
+      ${canDate ? `<button class="btn-blue" onclick="findPartner()">💘 Cari Pasangan</button>` : '<p style="font-size:12px; color:#8e8e93;">Tersedia setelah usia 16 tahun.</p>'}
+    `;
+  } else {
+    el.innerHTML = `
+      <div style="background:#2c2c2e; border-radius:12px; padding:14px;">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+          <div style="font-size:32px;">${G.gender==='Laki-laki'?'👩':'👨'}</div>
+          <div>
+            <div style="font-weight:800; font-size:15px;">${G.partner.name}</div>
+            <div style="font-size:12px; color:#8e8e93;">${G.partner.age} tahun · ${G.marriageYear?'💍 Menikah':'💑 Pacaran'}</div>
+            <div style="margin-top:4px;"><span class="badge badge-yellow">❤️ ${G.partner.relation}% cinta</span></div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+          <button class="btn-blue" style="font-size:13px;" onclick="datePartner()">🌹 Kencan (+Cinta)</button>
+          ${!G.marriageYear && G.partner.relation>=70 ? `<button class="btn-yellow" style="font-size:13px;" onclick="proposeMarriage()">💍 Lamar Nikah</button>` : ''}
+          ${G.marriageYear && G.children.length < 3 ? `<button class="btn-green" style="font-size:13px;" onclick="haveChild()">👶 Punya Anak</button>` : ''}
+          <button class="btn-red" style="font-size:13px;" onclick="breakUp()">💔 Putus</button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function findPartner(){
+  if(G.age < 16){ showNotif('Terlalu muda!','warn'); return; }
+  const partnerGender = G.gender==='Laki-laki'?'Perempuan':'Laki-laki';
+  G.partner = { name:randomName(partnerGender), age:G.age+rnd(-3,3), relation:30, gender:partnerGender };
+  addLog(`💘 Kamu bertemu ${G.partner.name}! Mulai pendekatan.`,'good');
+  renderFamily();
+  saveProgress();
+}
+
+function datePartner(){
+  if(!G.partner) return;
+  G.cash -= 200;
+  G.partner.relation = clamp(G.partner.relation+10);
+  G.stats.happiness = clamp(G.stats.happiness+8);
+  addLog(`🌹 Kencan seru bareng ${G.partner.name}. Hubungan makin dekat!`,'good');
+  renderFamily();
+  saveProgress();
+}
+
+function proposeMarriage(){
+  if(!G.partner || G.partner.relation < 70){ showNotif('Hubungan belum cukup kuat untuk menikah.','warn'); return; }
+  G.marriageYear = G.age;
+  G.partner.relation = clamp(G.partner.relation+20);
+  G.familyPrestige = clamp(G.familyPrestige+10);
+  addLog(`💍 ${G.name} menikah dengan ${G.partner.name}! Selamat!`,'good');
+  showNotif(`Selamat menikah! 💍🎊`,'info');
+  renderFamily();
+  saveProgress();
+}
+
+function haveChild(){
+  if(!G.marriageYear){ showNotif('Harus menikah dulu!','warn'); return; }
+  const childGender = Math.random()>0.5?'Laki-laki':'Perempuan';
+  const child = { name:randomName(childGender), gender:childGender, age:0 };
+  G.children.push(child);
+  G.stats.happiness = clamp(G.stats.happiness+15);
+  addLog(`👶 ${child.name} lahir! Selamat atas kehadiran buah hati.`,'good');
+  renderFamily();
+  renderChildren();
+  saveProgress();
+}
+
+function breakUp(){
+  if(!G.partner) return;
+  addLog(`💔 Hubungan dengan ${G.partner.name} berakhir.`,'bad');
+  G.stats.happiness = clamp(G.stats.happiness-20);
+  G.partner = null;
+  G.marriageYear = null;
+  renderFamily();
+  saveProgress();
+}
+
+function renderChildren(){
+  const el = document.getElementById('children-section');
+  if(!el) return;
+  G.children.forEach(c => c.age = G.age - (G.marriageYear||G.age) > 0 ? G.age - (G.marriageYear||G.age) : 0);
+  if(G.children.length===0){
+    el.innerHTML = '<p style="color:#8e8e93; font-size:13px;">Belum ada anak.</p>';
+  } else {
+    el.innerHTML = G.children.map(c=>`
+      <div style="background:#2c2c2e; border-radius:10px; padding:12px; margin-bottom:8px; display:flex; align-items:center; gap:10px;">
+        <div style="font-size:28px;">${c.gender==='Laki-laki'?'👦':'👧'}</div>
+        <div>
+          <div style="font-weight:700;">${c.name}</div>
+          <div style="font-size:12px; color:#8e8e93;">${c.gender} · Anak ke-${G.children.indexOf(c)+1}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+
+// ─── CAREER TAB ───────────────────────────────────────────────────────
+function renderCareer(){
+  renderEducation();
+  renderJobSection();
+}
+
+function renderEducation(){
+  const el = document.getElementById('education-section');
+  if(!el) return;
+  if(G.isStudying){
+    el.innerHTML = `
+      <div style="background:#2c2c2e; border-radius:10px; padding:14px;">
+        <div style="font-size:13px; color:#8e8e93; margin-bottom:6px;">Sedang Menempuh</div>
+        <div style="font-weight:800; font-size:16px; color:#007aff;">${EDUCATION_LEVELS[G.studyTarget]}</div>
+        <div style="font-size:13px; color:#8e8e93; margin-top:4px;">Sisa waktu: ${G.studyYearsLeft} tahun</div>
+        <div class="progress-bar" style="margin-top:8px;">
+          <div class="progress-fill" style="width:${((3-G.studyYearsLeft)/3)*100}%; background:#007aff;"></div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const eduCosts = [0,0,0,500,2000,8000,20000,50000];
+  const eduDuration = [0,6,3,3,3,4,2,3];
+  const eduMinAge = [0,6,12,15,18,18,22,24];
+
+  let rows = '';
+  for(let i=G.educationLevel+1; i<EDUCATION_LEVELS.length; i++){
+    if(i===0) continue;
+    const canStudy = G.age >= eduMinAge[i] && !G.isStudying;
+    const affordable = G.cash >= eduCosts[i];
+    rows += `
+      <div style="background:#2c2c2e; border-radius:10px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:700; font-size:14px;">${EDUCATION_LEVELS[i]}</div>
+          <div style="font-size:12px; color:#8e8e93; margin-top:2px;">Biaya: ${eduCosts[i]>0?fmtMoney(eduCosts[i]):'Gratis'} · Durasi: ${eduDuration[i]} tahun · Min usia: ${eduMinAge[i]}</div>
+        </div>
+        ${canStudy && affordable ? `<button class="btn-blue" style="padding:8px 14px; font-size:12px;" onclick="startStudy(${i},${eduCosts[i]},${eduDuration[i]})">Daftar</button>` : `<span class="badge ${!affordable?'badge-red':'badge-gray'}">${!affordable?'Tidak mampu':'Belum cukup umur'}</span>`}
+      </div>
+    `;
+    if(canStudy && affordable) break;
+  }
+
+  el.innerHTML = `
+    <div style="background:#2c2c2e; border-radius:10px; padding:12px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
+      <div>
+        <div style="font-size:12px; color:#8e8e93;">Pendidikan Saat Ini</div>
+        <div style="font-weight:800; font-size:15px;">${EDUCATION_LEVELS[G.educationLevel]}</div>
+      </div>
+      <span class="badge badge-green">Selesai</span>
+    </div>
+    ${rows || '<p style="font-size:13px; color:#8e8e93;">Kamu sudah mencapai pendidikan tertinggi yang tersedia.</p>'}
+  `;
+}
+
+function startStudy(level, cost, duration){
+  if(G.cash < cost){ showNotif('Uang tidak cukup!','warn'); return; }
+  G.cash -= cost;
+  G.isStudying = true;
+  G.studyTarget = level;
+  G.studyYearsLeft = duration;
+  addLog(`📚 Mulai menempuh ${EDUCATION_LEVELS[level]}. Biaya: ${fmtMoney(cost)}`,'good');
+  renderCareer();
+  saveProgress();
+}
+
+function renderJobSection(){
+  const el = document.getElementById('career-section');
+  if(!el) return;
+
+  let availableJobs = '';
+  Object.entries(JOBS).forEach(([jobName, jobData])=>{
+    if(jobName === G.job) return;
+    const hasEdu = G.educationLevel >= jobData.minEdu;
+    const hasStats = Object.entries(jobData.requires).every(([stat,val])=>(G.stats[stat]||0)>=val);
+    const canApply = hasEdu && hasStats;
+    const reqs = [];
+    if(jobData.minEdu>0) reqs.push(`${EDUCATION_LEVELS[jobData.minEdu]}+`);
+    Object.entries(jobData.requires).forEach(([s,v])=>reqs.push(`${s} ≥${v}%`));
+
+    availableJobs += `
+      <div style="background:#2c2c2e; border-radius:10px; padding:12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+        <div>
+          <div style="font-weight:700; font-size:14px;">${jobName}</div>
+          <div style="font-size:12px; color:#8e8e93; margin-top:2px;">Gaji: ${fmtMoney(jobData.salary)}/thn · ${reqs.join(' · ')||'Tanpa syarat'}</div>
+        </div>
+        ${canApply ? `<button class="btn-green" style="padding:8px 14px; font-size:12px;" onclick="applyJob('${jobName}')">Lamar</button>` : `<span class="badge badge-gray">Belum memenuhi</span>`}
+      </div>
+    `;
+  });
+
+  el.innerHTML = `
+    <div style="background:#2c2c2e; border-radius:10px; padding:12px; margin-bottom:12px;">
+      <div style="font-size:12px; color:#8e8e93; margin-bottom:4px;">Pekerjaan Sekarang</div>
+      <div style="font-weight:800; font-size:16px; color:#2ecc71;">${G.job}</div>
+      <div style="font-size:13px; color:#8e8e93; margin-top:2px;">Gaji: ${fmtMoney(G.salary)}/thn · ${G.jobYears} tahun pengalaman</div>
+    </div>
+    <p class="sub-section">Lowongan Tersedia</p>
+    ${availableJobs}
+  `;
+}
+
+function applyJob(jobName){
+  const jobData = JOBS[jobName];
+  if(!jobData) return;
+  const hasEdu = G.educationLevel >= jobData.minEdu;
+  const hasStats = Object.entries(jobData.requires).every(([stat,val])=>(G.stats[stat]||0)>=val);
+  if(!hasEdu || !hasStats){ showNotif('Tidak memenuhi syarat!','warn'); return; }
+  const sucRate = clamp((G.stats.intelligence + G.stats.social)/200*100, 30, 95)/100;
+  if(Math.random() < sucRate){
+    G.job = jobName;
+    G.salary = jobData.salary;
+    G.jobYears = 0;
+    addLog(`🎉 Diterima kerja sebagai ${jobName}! Gaji: ${fmtMoney(G.salary)}/thn`,'good');
+    showNotif(`Selamat! Kamu diterima sebagai ${jobName} 🎉`,'info');
+  } else {
+    addLog(`😔 Gagal wawancara kerja ${jobName}. Coba lagi nanti.`,'bad');
+    showNotif(`Gagal melamar ${jobName}. Tingkatkan statistik!`,'warn');
+  }
+  renderCareer();
+  saveProgress();
+}
+
+
+// ─── POLITICS TAB ─────────────────────────────────────────────────────
+function renderPolitik(){
+  const el = document.getElementById('politik-section');
+  if(!el) return;
+  const rank = POLITICAL_RANKS[G.politicalRank];
+  const nextRank = POLITICAL_RANKS[G.politicalRank+1];
+
+  el.innerHTML = `
+    <div class="card" style="padding:16px; margin-bottom:12px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <div style="font-size:36px;">${rank.icon}</div>
+        <div>
+          <div style="font-weight:800; font-size:18px;">${rank.name}</div>
+          <div style="font-size:13px; color:#8e8e93; margin-top:2px;">Gaji jabatan: ${fmtMoney([0,2000,8000,20000,50000][G.politicalRank]||0)}/thn</div>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:14px;">
+        <div style="background:#2c2c2e; padding:10px; border-radius:8px; text-align:center;">
+          <div style="font-size:20px; font-weight:800; color:#2ecc71;">${G.approvalRate}%</div>
+          <div style="font-size:11px; color:#8e8e93; margin-top:2px;">Approval Rate</div>
+        </div>
+        <div style="background:#2c2c2e; padding:10px; border-radius:8px; text-align:center;">
+          <div style="font-size:20px; font-weight:800; color:#007aff;">${G.partySupport}%</div>
+          <div style="font-size:11px; color:#8e8e93; margin-top:2px;">Dukungan Partai</div>
+        </div>
+        <div style="background:#2c2c2e; padding:10px; border-radius:8px; text-align:center;">
+          <div style="font-size:20px; font-weight:800; color:#ff9f0a;">${fmtMoney(G.treasury)}</div>
+          <div style="font-size:11px; color:#8e8e93; margin-top:2px;">Kas Negara</div>
+        </div>
+      </div>
+      ${G.politicalRank > 0 ? `
+      <div style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+        <button class="btn-blue" style="font-size:13px;" onclick="campaignImage()">📢 Kampanye Citra ($4.000) → Approval +15%</button>
+        <button class="btn-green" style="font-size:13px;" onclick="passReform()">📜 Loloskan Reformasi Kebijakan → Approval +10%</button>
+        <button class="btn-yellow" style="font-size:13px;" onclick="raiseTax()">💰 Naikkan Pajak Warga → Kas +$5jt, Approval -20%</button>
+        <button class="btn-gray" style="font-size:13px;" onclick="corruptFunds()">💸 Korupsi Dana (Berisiko!) → Kas +$2jt, Heat +30</button>
+      </div>
+      ` : ''}
+      ${nextRank ? `
+      <div style="background:#2c2c2e; border-radius:10px; padding:12px; border:1px solid #3a3a3c;">
+        <div style="font-size:13px; color:#8e8e93; margin-bottom:8px;">📈 Jabatan Berikutnya</div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-weight:700;">${nextRank.icon} ${nextRank.name}</div>
+            <div style="font-size:12px; color:#8e8e93; margin-top:2px;">Biaya: ${fmtMoney(nextRank.cost)} · Min usia: ${nextRank.minAge} thn</div>
+          </div>
+          ${G.age >= nextRank.minAge && G.cash >= nextRank.cost && G.approvalRate >= 50
+            ? `<button class="btn-yellow" style="font-size:12px; padding:8px 14px;" onclick="runElection(${G.politicalRank+1})">Maju Pemilu!</button>`
+            : `<span class="badge badge-gray">${G.age < nextRank.minAge ? 'Belum cukup umur' : G.cash < nextRank.cost ? 'Modal kurang' : 'Approval < 50%'}</span>`
+          }
+        </div>
+      </div>
+      ` : '<div style="text-align:center; padding:16px; color:#ff9f0a; font-weight:700;">👑 Kamu sudah mencapai puncak tertinggi kekuasaan!</div>'}
+    </div>
+  `;
+}
+
+function campaignImage(){
+  if(G.cash < 4000){ showNotif('Uang tidak cukup!','warn'); return; }
+  G.cash -= 4000;
+  G.approvalRate = clamp(G.approvalRate+15);
+  G.partySupport = clamp(G.partySupport+5);
+  addLog('📢 Kampanye citra berhasil! Approval +15%','good');
+  renderPolitik(); saveProgress();
+}
+
+function passReform(){
+  if(G.politicalRank === 0){ showNotif('Harus punya jabatan politik dulu!','warn'); return; }
+  const reforms = ['Program sekolah gratis','Bangun infrastruktur desa','Subsidi UMKM','Reformasi hukum perdata','Digitalisasi layanan publik'];
+  const reform = pick(reforms);
+  G.approvalRate = clamp(G.approvalRate+10);
+  addLog(`📜 Kebijakan "${reform}" disahkan. Approval +10%`,'good');
+  renderPolitik(); saveProgress();
+}
+
+function raiseTax(){
+  G.treasury += 5000000;
+  G.approvalRate = clamp(G.approvalRate-20);
+  addLog('💰 Pajak dinaikkan. Kas Negara +$5.000.000, Approval -20%','warning');
+  renderPolitik(); saveProgress();
+}
+
+function corruptFunds(){
+  if(G.politicalRank === 0){ showNotif('Harus punya jabatan dulu!','warn'); return; }
+  const chance = 0.5;
+  if(Math.random() < chance){
+    G.cash += 2000000;
+    G.illicitCash += 2000000;
+    G.heat = clamp(G.heat+30);
+    addLog('💸 Berhasil korupsi $2.000.000 dari kas negara! Heat +30','bad');
+    if(G.heat >= 80){
+      G.legalStatus = 'Buronan';
+      addLog('🚨 KPK mengincar! Status: Buronan!','bad');
+    }
+  } else {
+    G.legalStatus = 'Di Penjara';
+    G.jailYearsLeft = 5;
+    G.politicalRank = 0;
+    addLog('🚔 Tertangkap korupsi! Divonis 5 tahun penjara. Karir politik hancur!','bad');
+    showNotif('Tertangkap korupsi! 5 tahun penjara 🔒','warn');
+  }
+  renderPolitik(); saveProgress();
+}
+
+function runElection(targetRank){
+  const rank = POLITICAL_RANKS[targetRank];
+  if(G.cash < rank.cost){ showNotif('Modal tidak cukup!','warn'); return; }
+  if(G.age < rank.minAge){ showNotif('Belum cukup umur!','warn'); return; }
+  if(G.approvalRate < 50){ showNotif('Approval rate terlalu rendah!','warn'); return; }
+
+  openModal(`
+    <div style="text-align:center; margin-bottom:16px;">
+      <div style="font-size:36px; margin-bottom:8px;">🗳️</div>
+      <h3 style="font-size:18px; font-weight:800;">Debat Pemilu: ${rank.name}</h3>
+      <p style="font-size:13px; color:#8e8e93; margin-top:4px;">Biaya kampanye: ${fmtMoney(rank.cost)}</p>
+    </div>
+    <p style="font-size:14px; margin-bottom:16px;">Pertanyaan debat: <strong>Apa program andalan Anda untuk mengatasi kemiskinan?</strong></p>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      <button class="event-choice-btn" onclick="winElection(${targetRank}, '${rank.cost}', 0.8)">💡 "Program bantuan langsung tunai dan digitalisasi UMKM" (Jawaban Terbaik)</button>
+      <button class="event-choice-btn" onclick="winElection(${targetRank}, '${rank.cost}', 0.5)">📊 "Meningkatkan investasi asing dan membuka lapangan kerja" (Jawaban Biasa)</button>
+      <button class="event-choice-btn" onclick="winElection(${targetRank}, '${rank.cost}', 0.2)">🤷 "Kita lihat nanti saja..." (Jawaban Buruk)</button>
+    </div>
+    <button class="btn-red" style="width:100%; margin-top:12px;" onclick="closeModal()">Mundur dari Pemilu</button>
+  `, false);
+}
+
+function winElection(targetRank, cost, baseChance){
+  const rank = POLITICAL_RANKS[targetRank];
+  G.cash -= rank.cost;
+  const intBonus = (G.stats.intelligence / 100) * 0.2;
+  const chance = Math.min(0.95, baseChance + intBonus + (G.approvalRate/100)*0.1);
+  if(Math.random() < chance){
+    G.politicalRank = targetRank;
+    G.approvalRate = clamp(G.approvalRate + 10);
+    addLog(`🎉 Terpilih sebagai ${rank.name}! Karir politik melesat!`,'good');
+    showNotif(`Selamat! Kamu terpilih sebagai ${rank.name} 🎉`,'info');
+  } else {
+    addLog(`😔 Kalah dalam pemilihan ${rank.name}. Modal ${fmtMoney(rank.cost)} habis.`,'bad');
+    showNotif(`Kalah pemilu. Coba di periode berikutnya!`,'warn');
+  }
+  closeModal();
+  renderPolitik(); saveProgress();
+}
+
+
+// ─── CRIMINAL TAB ─────────────────────────────────────────────────────
+function renderKriminal(){
+  const el = document.getElementById('criminal-stats');
+  const actEl = document.getElementById('criminal-actions');
+  if(!el || !actEl) return;
+
+  const heatColor = G.heat<40?'#2ecc71':G.heat<70?'#ff9f0a':'#ff3b30';
+  el.innerHTML = `
+    <div style="background:#2c2c2e; padding:12px; border-radius:10px; text-align:center;">
+      <div style="font-size:22px; font-weight:800; color:${heatColor};">${G.heat}%</div>
+      <div style="font-size:12px; color:#8e8e93;">🌡️ Heat Level</div>
+      <div class="progress-bar" style="margin-top:6px;"><div class="progress-fill" style="width:${G.heat}%; background:${heatColor};"></div></div>
+    </div>
+    <div style="background:#2c2c2e; padding:12px; border-radius:10px; text-align:center;">
+      <div style="font-size:22px; font-weight:800; color:#ff9f0a;">${G.criminalRep}</div>
+      <div style="font-size:12px; color:#8e8e93;">💀 Reputasi Kriminal</div>
+    </div>
+    <div style="background:#2c2c2e; padding:12px; border-radius:10px; text-align:center;">
+      <div style="font-size:22px; font-weight:800; color:#ff3b30;">${fmtMoney(G.illicitCash)}</div>
+      <div style="font-size:12px; color:#8e8e93;">💰 Uang Kotor</div>
+    </div>
+    <div style="background:#2c2c2e; padding:12px; border-radius:10px; text-align:center;">
+      <div style="font-size:16px; font-weight:800; color:${G.legalStatus==='Bebas'?'#2ecc71':G.legalStatus==='Di Penjara'?'#ff3b30':'#ff9f0a'}">${G.legalStatus}</div>
+      <div style="font-size:12px; color:#8e8e93;">⚖️ Status Hukum</div>
+    </div>
+  `;
+
+  let actionsHtml = '<div style="display:flex; flex-direction:column; gap:10px;">';
+
+  CRIME_ACTIONS.forEach(crime=>{
+    if(G.age < crime.minAge){ return; }
+    const successRate = Math.round(((G.stats.intelligence + G.criminalRep) / 200) * 100);
+    actionsHtml += `
+      <div class="card" style="padding:14px; border:1px solid rgba(255,59,48,.2);">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+          <div>
+            <div style="font-weight:700; font-size:15px;">${crime.name}</div>
+            <div style="font-size:12px; color:#8e8e93; margin-top:2px;">${crime.desc}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:13px; font-weight:700; color:#2ecc71;">+${fmtMoney(crime.reward)}</div>
+            <div style="font-size:11px; color:#ff9f0a;">Heat +${crime.heat}</div>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span class="badge badge-blue">Peluang sukses: ~${successRate}%</span>
+          <button class="btn-red" style="padding:7px 14px; font-size:13px;" onclick="commitCrime('${crime.id}')">Lakukan</button>
+        </div>
+      </div>
+    `;
+  });
+
+  actionsHtml += `
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px;">
+      <button class="btn-gray" onclick="layLow()">😴 Lay Low (Heat -25)</button>
+      ${G.illicitCash > 0 ? `<button class="btn-yellow" onclick="launderMoney()">🧺 Cuci Uang (-20% biaya)</button>` : '<button class="btn-gray" disabled style="opacity:.5;">🧺 Cuci Uang</button>'}
+      ${G.legalStatus==='Di Penjara' ? `<button class="btn-blue" style="grid-column:1/-1;" onclick="hireLawyer()">👔 Sewa Pengacara ($10.000)</button>` : ''}
+    </div>
+  `;
+
+  actEl.innerHTML = actionsHtml;
+}
+
+function commitCrime(crimeId){
+  if(G.legalStatus === 'Di Penjara'){ showNotif('Kamu sedang di penjara!','warn'); return; }
+  const crime = CRIME_ACTIONS.find(c=>c.id===crimeId);
+  if(!crime || G.age < crime.minAge){ return; }
+
+  const successRate = (G.stats.intelligence + G.criminalRep) / 200;
+  if(Math.random() < successRate){
+    G.illicitCash += crime.reward;
+    G.heat = clamp(G.heat + crime.heat);
+    G.criminalRep = clamp(G.criminalRep + 5);
+    G.totalCrimes++;
+    addLog(`💰 Berhasil ${crime.name}! Dapat ${fmtMoney(crime.reward)} uang kotor. Heat +${crime.heat}`,'bad');
+    showNotif(`${crime.name} berhasil! +${fmtMoney(crime.reward)} 💰`,'info');
+    if(G.heat >= 100){
+      G.legalStatus = 'Buronan';
+      addLog('🚨 Polisi mengincar kamu! Status: BURONAN!','bad');
+    }
+  } else {
+    const caught = Math.random() < 0.5;
+    if(caught){
+      G.heat = clamp(G.heat + crime.heat * 2);
+      G.legalStatus = 'Di Penjara';
+      G.jailYearsLeft = 3;
+      addLog(`🚔 Tertangkap saat ${crime.name}! Divonis 3 tahun penjara.`,'bad');
+      showNotif('Tertangkap polisi! 3 tahun penjara 🔒','warn');
+    } else {
+      G.heat = clamp(G.heat + crime.heat/2);
+      addLog(`😅 Gagal ${crime.name} tapi berhasil kabur. Heat +${Math.round(crime.heat/2)}`,'bad');
+    }
+  }
+  renderKriminal();
+  saveProgress();
+}
+
+function layLow(){
+  G.heat = clamp(G.heat - 25);
+  if(G.legalStatus === 'Buronan' && G.heat < 50) G.legalStatus = 'Bebas';
+  addLog('😴 Bersembunyi sejenak. Heat berkurang -25.','neutral');
+  showNotif('Lay low berhasil. Heat berkurang!','info');
+  renderKriminal();
+  saveProgress();
+}
+
+function launderMoney(){
+  if(G.illicitCash <= 0){ showNotif('Tidak ada uang kotor!','warn'); return; }
+  const fee = Math.round(G.illicitCash * 0.20);
+  const cleaned = G.illicitCash - fee;
+  G.cash += cleaned;
+  G.illicitCash = 0;
+  addLog(`🧺 Uang ${fmtMoney(G.illicitCash+cleaned)} berhasil dicuci. Biaya layanan: ${fmtMoney(fee)}. Dapat bersih: ${fmtMoney(cleaned)}`,'good');
+  showNotif(`Cuci uang selesai! +${fmtMoney(cleaned)} masuk kas 💰`,'info');
+  renderKriminal();
+  saveProgress();
+}
+
+function hireLawyer(){
+  if(G.cash < 10000){ showNotif('Uang tidak cukup! Butuh $10.000','warn'); return; }
+  G.cash -= 10000;
+  G.legalStatus = 'Bebas';
+  G.jailYearsLeft = 0;
+  G.heat = clamp(G.heat - 30);
+  addLog('👔 Pengacara berhasil membebaskanmu dari penjara! Biaya: $10.000','good');
+  showNotif('Bebas dari penjara berkat pengacara handal! 🎉','info');
+  renderKriminal();
+  saveProgress();
+}
+
+
+// ─── ASSETS TAB ───────────────────────────────────────────────────────
+function renderAset(){
+  renderNetWorth();
+  renderBusinessList();
+  renderPropertyList();
+}
+
+function renderNetWorth(){
+  const el = document.getElementById('networth-display');
+  if(!el) return;
+  const nw = calcNetWorth();
+  const cf = calcAnnualCashflow();
+  el.innerHTML = `
+    <div style="text-align:center; padding:16px; background:#2c2c2e; border-radius:12px; margin-bottom:12px;">
+      <div style="font-size:11px; color:#8e8e93; margin-bottom:4px;">Total Kekayaan Bersih</div>
+      <div style="font-size:32px; font-weight:900; color:#2ecc71;">${fmtMoney(nw)}</div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+      <div style="background:#2c2c2e; padding:10px; border-radius:8px; text-align:center;">
+        <div style="font-size:16px; font-weight:700; color:#007aff;">${fmtMoney(G.cash)}</div>
+        <div style="font-size:11px; color:#8e8e93;">💵 Cash</div>
+      </div>
+      <div style="background:#2c2c2e; padding:10px; border-radius:8px; text-align:center;">
+        <div style="font-size:16px; font-weight:700; color:#ff9f0a;">${fmtMoney(G.bankBalance)}</div>
+        <div style="font-size:11px; color:#8e8e93;">🏦 Tabungan</div>
+      </div>
+      <div style="background:#2c2c2e; padding:10px; border-radius:8px; text-align:center;">
+        <div style="font-size:16px; font-weight:700; color:${cf>=0?'#2ecc71':'#ff3b30'}">${fmtMoney(cf)}</div>
+        <div style="font-size:11px; color:#8e8e93;">📊 Cashflow/thn</div>
+      </div>
+    </div>
+  `;
+}
+
+function renderBusinessList(){
+  const el = document.getElementById('business-list');
+  if(!el) return;
+  if(G.businesses.length === 0){
+    el.innerHTML = '<p style="color:#8e8e93; font-size:13px;">Belum ada bisnis yang dimiliki.</p>';
+    return;
+  }
+  el.innerHTML = G.businesses.map(biz=>`
+    <div style="background:#2c2c2e; border-radius:12px; padding:14px; margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:24px;">${biz.icon}</span>
+          <div>
+            <div style="font-weight:800; font-size:15px;">${biz.name}</div>
+            <div style="font-size:12px; color:#8e8e93;">${biz.type}</div>
+          </div>
+        </div>
+        <span class="badge ${(biz.lossStreak||0)>0?'badge-red':'badge-green'}">${(biz.lossStreak||0)>0?`Rugi ${biz.lossStreak} thn`:'Beroperasi'}</span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; font-size:13px;">
+        <div style="background:#1c1c1e; padding:8px; border-radius:6px;">
+          <span style="color:#8e8e93;">Pendapatan dasar:</span> ${fmtMoney(biz.baseProfit)}/thn
+        </div>
+        <div style="background:#1c1c1e; padding:8px; border-radius:6px;">
+          <span style="color:#8e8e93;">Gaji karyawan:</span> ${fmtMoney(biz.wage)}/thn
+        </div>
+        <div style="background:#1c1c1e; padding:8px; border-radius:6px;">
+          <span style="color:#8e8e93;">Budget iklan:</span> ${fmtMoney(biz.adBudget)}/thn
+        </div>
+        <div style="background:#1c1c1e; padding:8px; border-radius:6px;">
+          <span style="color:#8e8e93;">Total profit:</span> ${fmtMoney(biz.totalProfit||0)}
+        </div>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-blue" style="flex:1; font-size:12px; padding:8px;" onclick="manageBusiness('${biz.id}')">⚙️ Kelola</button>
+        <button class="btn-red" style="font-size:12px; padding:8px 14px;" onclick="sellBusiness('${biz.id}')">💸 Jual</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function showFoundBusiness(){
+  const types = BUSINESS_TYPES.map((b,i)=>`
+    <div class="event-choice-btn" onclick="selectBizType(${i})" id="biz-type-${i}" style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size:24px;">${b.icon}</span>
+      <div>
+        <div style="font-weight:700;">${b.name}</div>
+        <div style="font-size:12px; color:#8e8e93; margin-top:2px;">Modal: ${fmtMoney(b.cost)} · Profit dasar: ${fmtMoney(b.baseProfit)}/thn · ${b.desc}</div>
+      </div>
+    </div>
+  `).join('');
+
+  openModal(`
+    <h3 style="font-size:18px; font-weight:800; margin-bottom:16px;">🏢 Dirikan Bisnis Baru</h3>
+    <div style="margin-bottom:14px;">
+      <label style="font-size:12px; color:#8e8e93; display:block; margin-bottom:6px;">Nama Bisnis</label>
+      <input id="new-biz-name" class="input-field" placeholder="Masukkan nama bisnis Anda...">
+    </div>
+    <p class="sub-section">Pilih Kategori Bisnis</p>
+    ${types}
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;">
+      <div>
+        <label style="font-size:12px; color:#8e8e93; display:block; margin-bottom:6px;">Gaji Karyawan/thn</label>
+        <input id="new-biz-wage" class="input-field" type="number" value="5000" min="1000">
+      </div>
+      <div>
+        <label style="font-size:12px; color:#8e8e93; display:block; margin-bottom:6px;">Budget Iklan/thn</label>
+        <input id="new-biz-ad" class="input-field" type="number" value="1000" min="0">
+      </div>
+    </div>
+    <button class="btn-green" style="width:100%; margin-top:14px;" onclick="foundBusiness()">🚀 Dirikan Sekarang</button>
+    <button class="btn-gray" style="width:100%; margin-top:8px;" onclick="closeModal()">Batal</button>
+  `);
+  window._selectedBizType = 0;
+}
+
+window._selectedBizType = 0;
+function selectBizType(idx){
+  window._selectedBizType = idx;
+  document.querySelectorAll('[id^="biz-type-"]').forEach((el,i)=>{
+    el.style.borderColor = i===idx ? '#007aff' : '#3a3a3c';
+    el.style.background = i===idx ? 'rgba(0,122,255,.15)' : '#2c2c2e';
+  });
+}
+
+function foundBusiness(){
+  const name = document.getElementById('new-biz-name').value.trim();
+  const wage = parseInt(document.getElementById('new-biz-wage').value)||5000;
+  const ad = parseInt(document.getElementById('new-biz-ad').value)||1000;
+  const btype = BUSINESS_TYPES[window._selectedBizType];
+  if(!name){ showNotif('Masukkan nama bisnis!','warn'); return; }
+  if(G.cash < btype.cost){ showNotif(`Modal tidak cukup! Butuh ${fmtMoney(btype.cost)}`,'warn'); return; }
+  G.cash -= btype.cost;
+  const bizId = 'biz_'+Date.now();
+  G.businesses.push({ id:bizId, name, type:btype.name, icon:btype.icon, cost:btype.cost, baseProfit:btype.baseProfit, wage, adBudget:ad, lossStreak:0, totalProfit:0 });
+  addLog(`🏢 Bisnis "${name}" (${btype.name}) resmi berdiri! Modal: ${fmtMoney(btype.cost)}`,'good');
+  showNotif(`Bisnis "${name}" berhasil didirikan! 🎉`,'info');
+  closeModal();
+  renderAset();
+  saveProgress();
+}
+
+function manageBusiness(bizId){
+  const biz = G.businesses.find(b=>b.id===bizId);
+  if(!biz) return;
+  openModal(`
+    <h3 style="font-size:18px; font-weight:800; margin-bottom:4px;">⚙️ Kelola: ${biz.name}</h3>
+    <p style="font-size:13px; color:#8e8e93; margin-bottom:16px;">${biz.type}</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+      <div>
+        <label style="font-size:12px; color:#8e8e93; display:block; margin-bottom:6px;">Gaji Karyawan/thn</label>
+        <input id="mgmt-wage" class="input-field" type="number" value="${biz.wage}" min="1000">
+        <div style="font-size:11px; color:#8e8e93; margin-top:4px;">&lt;$3k: demo, $3-5k: normal, &gt;$5k: loyal</div>
+      </div>
+      <div>
+        <label style="font-size:12px; color:#8e8e93; display:block; margin-bottom:6px;">Budget Iklan/thn</label>
+        <input id="mgmt-ad" class="input-field" type="number" value="${biz.adBudget}" min="0">
+        <div style="font-size:11px; color:#8e8e93; margin-top:4px;">&gt;$2k: +20% profit</div>
+      </div>
+    </div>
+    <button class="btn-green" style="width:100%;" onclick="applyBizChanges('${bizId}')">✅ Simpan Perubahan</button>
+    <button class="btn-gray" style="width:100%; margin-top:8px;" onclick="closeModal()">Batal</button>
+  `);
+}
+
+function applyBizChanges(bizId){
+  const biz = G.businesses.find(b=>b.id===bizId);
+  if(!biz) return;
+  biz.wage = parseInt(document.getElementById('mgmt-wage').value)||biz.wage;
+  biz.adBudget = parseInt(document.getElementById('mgmt-ad').value)||0;
+  if(biz.wage < 3000) addLog(`⚠️ Gaji karyawan ${biz.name} terlalu rendah! Risiko demo buruh.`,'warning');
+  closeModal();
+  renderAset();
+  saveProgress();
+}
+
+function sellBusiness(bizId){
+  const biz = G.businesses.find(b=>b.id===bizId);
+  if(!biz) return;
+  const sellPrice = Math.round(biz.cost * 0.6);
+  G.cash += sellPrice;
+  G.businesses = G.businesses.filter(b=>b.id!==bizId);
+  addLog(`💸 Bisnis "${biz.name}" dijual seharga ${fmtMoney(sellPrice)}.`,'good');
+  renderAset();
+  saveProgress();
+}
+
+function renderPropertyList(){
+  const el = document.getElementById('property-list');
+  if(!el) return;
+  el.innerHTML = PROPERTIES.map(p=>{
+    const owned = G.ownedProperties.includes(p.id);
+    return `
+      <div style="background:#2c2c2e; border-radius:12px; padding:14px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:28px;">${p.icon}</span>
+          <div>
+            <div style="font-weight:700; font-size:14px;">${p.name}</div>
+            <div style="font-size:12px; color:#8e8e93; margin-top:2px;">Nilai: ${fmtMoney(p.price)} · Sewa: +${fmtMoney(p.rent)}/thn</div>
+          </div>
+        </div>
+        ${owned
+          ? `<div style="display:flex; gap:6px;"><span class="badge badge-green">✅ Dimiliki</span><button class="btn-red" style="padding:6px 12px; font-size:12px;" onclick="sellProperty('${p.id}')">Jual</button></div>`
+          : G.cash >= p.price
+            ? `<button class="btn-blue" style="padding:8px 14px; font-size:13px;" onclick="buyProperty('${p.id}')">Beli</button>`
+            : `<span class="badge badge-gray">Tidak mampu</span>`
+        }
+      </div>
+    `;
+  }).join('');
+}
+
+function buyProperty(pid){
+  const p = PROPERTIES.find(x=>x.id===pid);
+  if(!p || G.cash < p.price){ showNotif('Uang tidak cukup!','warn'); return; }
+  G.cash -= p.price;
+  G.ownedProperties.push(pid);
+  addLog(`🏠 Membeli ${p.name} seharga ${fmtMoney(p.price)}. Passive income: +${fmtMoney(p.rent)}/thn`,'good');
+  renderAset(); saveProgress();
+}
+
+function sellProperty(pid){
+  const p = PROPERTIES.find(x=>x.id===pid);
+  if(!p) return;
+  const sellPrice = Math.round(p.price * 0.8);
+  G.cash += sellPrice;
+  G.ownedProperties = G.ownedProperties.filter(x=>x!==pid);
+  addLog(`🏠 Menjual ${p.name} seharga ${fmtMoney(sellPrice)}.`,'good');
+  renderAset(); saveProgress();
+}
+
+
+// ─── BANK TAB ─────────────────────────────────────────────────────────
+function renderBank(){
+  const bankEl = document.getElementById('bank-section');
+  const loanEl = document.getElementById('loan-section');
+  if(!bankEl||!loanEl) return;
+
+  bankEl.innerHTML = `
+    <div style="background:linear-gradient(135deg,#007aff,#005bb5); border-radius:14px; padding:20px; margin-bottom:14px; color:#fff;">
+      <div style="font-size:12px; opacity:.8; margin-bottom:4px;">Saldo Tabungan</div>
+      <div style="font-size:28px; font-weight:900;">${fmtMoney(G.bankBalance)}</div>
+      <div style="font-size:12px; opacity:.7; margin-top:4px;">Bunga: 3%/thn otomatis</div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:12px;">
+      <div>
+        <label style="font-size:12px; color:#8e8e93; display:block; margin-bottom:6px;">Jumlah Setor</label>
+        <input id="deposit-amount" class="input-field" type="number" placeholder="Jumlah ($)" min="100">
+      </div>
+      <div style="display:flex; align-items:flex-end;">
+        <button class="btn-blue" style="width:100%;" onclick="depositBank()">⬆️ Setor</button>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+      <div>
+        <label style="font-size:12px; color:#8e8e93; display:block; margin-bottom:6px;">Jumlah Tarik</label>
+        <input id="withdraw-amount" class="input-field" type="number" placeholder="Jumlah ($)" min="100">
+      </div>
+      <div style="display:flex; align-items:flex-end;">
+        <button class="btn-gray" style="width:100%;" onclick="withdrawBank()">⬇️ Tarik</button>
+      </div>
+    </div>
+    <div style="margin-top:12px; background:#2c2c2e; border-radius:8px; padding:10px;">
+      <div style="font-size:12px; color:#8e8e93;">💡 Catatan: Setiap tahun tabungan mendapat bunga 3% otomatis.</div>
+    </div>
+  `;
+
+  loanEl.innerHTML = `
+    ${G.bankDebt > 0 ? `
+      <div style="background:rgba(255,59,48,.1); border:1px solid rgba(255,59,48,.3); border-radius:12px; padding:14px; margin-bottom:14px;">
+        <div style="font-size:13px; color:#ff3b30; font-weight:700; margin-bottom:6px;">⚠️ Pinjaman Aktif</div>
+        <div style="font-size:22px; font-weight:800; color:#ff3b30; margin-bottom:4px;">${fmtMoney(G.bankDebt)}</div>
+        <div style="font-size:13px; color:#8e8e93;">Cicilan: ${fmtMoney(G.loanMonthly)}/bulan (${fmtMoney(G.loanMonthly*12)}/thn)</div>
+        <button class="btn-green" style="width:100%; margin-top:12px;" onclick="payLoan()">💳 Lunasi Sekarang (${fmtMoney(G.bankDebt)})</button>
+      </div>
+    ` : '<div style="color:#2ecc71; font-size:13px; font-weight:700; margin-bottom:14px;">✅ Tidak ada pinjaman aktif</div>'}
+    <p class="sub-section" style="margin-bottom:10px;">Ajukan Pinjaman</p>
+    <div style="display:flex; flex-direction:column; gap:8px;">
+      ${[
+        { amount:5000,  monthly:500,  label:'Pinjaman Kecil ($5.000)' },
+        { amount:20000, monthly:1800, label:'Pinjaman Menengah ($20.000)' },
+        { amount:50000, monthly:4200, label:'Pinjaman Besar ($50.000)' }
+      ].map(l=>`
+        <div style="background:#2c2c2e; border-radius:10px; padding:12px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="font-weight:700; font-size:14px;">${l.label}</div>
+            <div style="font-size:12px; color:#8e8e93;">Cicilan: ${fmtMoney(l.monthly)}/bulan</div>
+          </div>
+          ${G.bankDebt===0 ? `<button class="btn-yellow" style="font-size:12px; padding:8px 14px;" onclick="takeLoan(${l.amount},${l.monthly})">Ajukan</button>` : '<span class="badge badge-gray">Ada hutang</span>'}
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // Auto apply bank interest yearly
+  if(G.bankBalance > 0 && G._lastBankAge !== G.age){
+    G._lastBankAge = G.age;
+    const interest = Math.round(G.bankBalance * 0.03);
+    G.bankBalance += interest;
+    if(interest > 0) addLog(`🏦 Bunga tabungan bank: +${fmtMoney(interest)} (3%)`, 'good');
+  }
+}
+
+function depositBank(){
+  const amount = parseInt(document.getElementById('deposit-amount').value)||0;
+  if(amount <= 0){ showNotif('Masukkan jumlah yang valid!','warn'); return; }
+  if(G.cash < amount){ showNotif('Saldo cash tidak cukup!','warn'); return; }
+  G.cash -= amount;
+  G.bankBalance += amount;
+  addLog(`🏦 Setor ${fmtMoney(amount)} ke rekening bank.`,'good');
+  renderBank(); renderHUD(); saveProgress();
+}
+
+function withdrawBank(){
+  const amount = parseInt(document.getElementById('withdraw-amount').value)||0;
+  if(amount <= 0){ showNotif('Masukkan jumlah yang valid!','warn'); return; }
+  if(G.bankBalance < amount){ showNotif('Saldo tabungan tidak cukup!','warn'); return; }
+  G.bankBalance -= amount;
+  G.cash += amount;
+  addLog(`🏦 Tarik ${fmtMoney(amount)} dari rekening bank.`,'good');
+  renderBank(); renderHUD(); saveProgress();
+}
+
+function takeLoan(amount, monthly){
+  if(G.bankDebt > 0){ showNotif('Lunasi pinjaman dulu!','warn'); return; }
+  G.cash += amount;
+  G.bankDebt = amount;
+  G.loanMonthly = monthly;
+  addLog(`💳 Pinjaman ${fmtMoney(amount)} disetujui. Cicilan ${fmtMoney(monthly)}/bulan.`,'warning');
+  showNotif(`Pinjaman ${fmtMoney(amount)} cair! 💰`,'info');
+  renderBank(); renderHUD(); saveProgress();
+}
+
+function payLoan(){
+  if(G.cash < G.bankDebt){ showNotif('Cash tidak cukup untuk melunasi!','warn'); return; }
+  G.cash -= G.bankDebt;
+  addLog(`✅ Pinjaman ${fmtMoney(G.bankDebt)} berhasil dilunasi!`,'good');
+  G.bankDebt = 0;
+  G.loanMonthly = 0;
+  renderBank(); renderHUD(); saveProgress();
+}
+
+
+// ─── INTERNET BROWSER PAGES ───────────────────────────────────────────
+function browserPage(page){
+  const el = document.getElementById('browser-page-content');
+  if(!el) return;
+  if(page==='saham') renderStockPage(el);
+  else if(page==='properti') renderPropertyBrowserPage(el);
+  else if(page==='betting') renderBettingPage(el);
+  else if(page==='berita') renderNewsPage(el);
+}
+
+function renderStockPage(el){
+  const rows = ['TECH','ENRG','BNS'].map(ticker=>{
+    const s = G.stocks[ticker];
+    const totalValue = s.price * s.ownedShares;
+    const change = G.stockNextMultiplier[ticker];
+    const changeColor = change>=1?'#2ecc71':'#ff3b30';
+    const changeText = change>=1?`+${Math.round((change-1)*100)}% prediksi`:`${Math.round((change-1)*100)}% prediksi`;
+    return `
+      <div class="stock-card">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+          <div>
+            <div style="font-weight:800; font-size:16px; color:#1c1c1e;">${ticker}</div>
+            <div style="font-size:12px; color:#555; margin-top:1px;">${s.name}</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-weight:800; font-size:18px; color:#1c1c1e;">${fmtMoney(s.price)}</div>
+            <div style="font-size:12px; color:${changeColor}; font-weight:600;">${changeText}</div>
+          </div>
+        </div>
+        <div style="font-size:12px; color:#555; margin-bottom:10px;">Dimiliki: ${s.ownedShares} lembar (${fmtMoney(totalValue)})</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:6px; align-items:center;">
+          <input id="stock-qty-${ticker}" type="number" style="background:#f2f2f7; border:1px solid #ddd; border-radius:8px; padding:6px 10px; font-size:13px; color:#1c1c1e;" placeholder="Lembar" min="1">
+          <button style="background:#2ecc71; color:#000; border:none; border-radius:8px; padding:8px; font-weight:700; font-size:12px; cursor:pointer;" onclick="buyStock('${ticker}')">Beli</button>
+          <button style="background:#ff3b30; color:#fff; border:none; border-radius:8px; padding:8px; font-weight:700; font-size:12px; cursor:pointer;" onclick="sellStock('${ticker}')">Jual</button>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="sim-browser">
+      <div class="browser-bar">
+        <div class="browser-url">simburs a.id — Pasar Saham Simulasi</div>
+      </div>
+      <div class="browser-content">
+        <div style="font-weight:800; font-size:16px; color:#1c1c1e; margin-bottom:4px;">📈 SimBursa.id</div>
+        <div style="font-size:12px; color:#555; margin-bottom:14px;">Perdagangkan saham emiten terpercaya</div>
+        <div style="background:#fff8e7; border:1px solid #ffe0a0; border-radius:8px; padding:8px 12px; font-size:12px; color:#7a5c00; margin-bottom:14px;">
+          💡 Bonus Analytical: +10% peluang cuan ${G.trait==='Analytical'?'✅ AKTIF':'(tidak aktif)'}
+        </div>
+        ${rows}
+      </div>
+    </div>
+  `;
+}
+
+function buyStock(ticker){
+  const qty = parseInt(document.getElementById(`stock-qty-${ticker}`).value)||0;
+  if(qty <= 0){ showNotif('Masukkan jumlah lembar!','warn'); return; }
+  const s = G.stocks[ticker];
+  const cost = s.price * qty;
+  if(G.cash < cost){ showNotif(`Butuh ${fmtMoney(cost)}, cash kurang!`,'warn'); return; }
+  G.cash -= cost;
+  s.ownedShares += qty;
+  addLog(`📈 Beli ${qty} lembar ${ticker} @ ${fmtMoney(s.price)}. Total: ${fmtMoney(cost)}`,'good');
+  browserPage('saham');
+  renderHUD(); saveProgress();
+}
+
+function sellStock(ticker){
+  const qty = parseInt(document.getElementById(`stock-qty-${ticker}`).value)||0;
+  const s = G.stocks[ticker];
+  if(qty <= 0){ showNotif('Masukkan jumlah lembar!','warn'); return; }
+  if(s.ownedShares < qty){ showNotif('Lembar saham tidak cukup!','warn'); return; }
+  const gain = s.price * qty;
+  let bonus = 0;
+  if(G.trait==='Analytical' && Math.random()<0.1){ bonus = Math.round(gain*0.1); }
+  G.cash += gain + bonus;
+  s.ownedShares -= qty;
+  addLog(`📉 Jual ${qty} lembar ${ticker} @ ${fmtMoney(s.price)}. Dapat: ${fmtMoney(gain+bonus)}${bonus>0?' (bonus Analytical +'+fmtMoney(bonus)+')':''}`,'good');
+  browserPage('saham');
+  renderHUD(); saveProgress();
+}
+
+function renderPropertyBrowserPage(el){
+  el.innerHTML = `
+    <div class="sim-browser">
+      <div class="browser-bar">
+        <div class="browser-url">rumahsim.id — Real Estate</div>
+      </div>
+      <div class="browser-content">
+        <div style="font-weight:800; font-size:16px; color:#1c1c1e; margin-bottom:14px;">🏘️ RumahSim.id — Investasi Properti</div>
+        ${PROPERTIES.map(p=>{
+          const owned = G.ownedProperties.includes(p.id);
+          return `
+            <div style="background:#fff; border:1px solid #e5e5ea; border-radius:12px; padding:14px; margin-bottom:10px;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <span style="font-size:32px;">${p.icon}</span>
+                  <div>
+                    <div style="font-weight:800; font-size:14px; color:#1c1c1e;">${p.name}</div>
+                    <div style="font-size:12px; color:#888;">ROI: ${((p.rent/p.price)*100).toFixed(1)}%/thn</div>
+                  </div>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-weight:800; font-size:16px; color:#1c1c1e;">${fmtMoney(p.price)}</div>
+                  <div style="font-size:12px; color:#2ecc71;">+${fmtMoney(p.rent)}/thn</div>
+                </div>
+              </div>
+              ${owned
+                ? `<div style="display:flex; justify-content:space-between; align-items:center;"><span style="color:#2ecc71; font-weight:700; font-size:13px;">✅ Sudah dimiliki</span><button style="background:#ff3b30; color:#fff; border:none; border-radius:8px; padding:8px 14px; font-size:12px; cursor:pointer; font-weight:700;" onclick="sellProperty('${p.id}'); browserPage('properti');">Jual (${fmtMoney(Math.round(p.price*0.8))})</button></div>`
+                : G.cash >= p.price
+                  ? `<button style="background:#007aff; color:#fff; border:none; border-radius:10px; padding:10px; width:100%; font-weight:700; cursor:pointer; font-size:13px;" onclick="buyProperty('${p.id}'); browserPage('properti');">Beli Sekarang</button>`
+                  : `<div style="background:#fff0f0; border-radius:8px; padding:8px; text-align:center; font-size:12px; color:#ff3b30;">Cash kurang ${fmtMoney(p.price - G.cash)}</div>`
+              }
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderBettingPage(el){
+  el.innerHTML = `
+    <div class="sim-browser">
+      <div class="browser-bar">
+        <div class="browser-url">taruhbola.id — World Cup Betting</div>
+      </div>
+      <div class="browser-content">
+        <div style="font-weight:800; font-size:16px; color:#1c1c1e; margin-bottom:4px;">⚽ TaruhBola.id</div>
+        <div style="font-size:12px; color:#555; margin-bottom:16px;">Taruhan World Cup — Menang 2x lipat, peluang 50/50</div>
+        <div style="background:#fff0f0; border:1px solid #ffd5d5; border-radius:8px; padding:10px; margin-bottom:14px; font-size:12px; color:#cc0000;">
+          ⚠️ Peringatan: Judi bisa menyebabkan kerugian finansial besar. Pasang dengan bijak!
+        </div>
+        <div style="background:#f8f8f8; border-radius:12px; padding:16px;">
+          <div style="display:flex; gap:10px; margin-bottom:8px; font-weight:700; color:#1c1c1e; font-size:14px;">
+            <span>🇧🇷 Brasil</span><span style="color:#999;">vs</span><span>🇩🇪 Jerman</span>
+          </div>
+          <div style="font-size:12px; color:#555; margin-bottom:14px;">Final World Cup 2026 · Odds: 1:2</div>
+          <div style="margin-bottom:10px;">
+            <label style="font-size:12px; color:#555; display:block; margin-bottom:6px;">Jumlah Taruhan ($)</label>
+            <input id="bet-amount" type="number" style="background:#fff; border:1px solid #ddd; border-radius:8px; padding:10px; width:100%; font-size:14px; color:#1c1c1e;" placeholder="Masukkan nominal..." min="100">
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+            <button style="background:#2ecc71; color:#000; border:none; border-radius:10px; padding:12px; font-weight:800; cursor:pointer;" onclick="placeBet('Brasil')">🇧🇷 Bet Brasil</button>
+            <button style="background:#007aff; color:#fff; border:none; border-radius:10px; padding:12px; font-weight:800; cursor:pointer;" onclick="placeBet('Jerman')">🇩🇪 Bet Jerman</button>
+          </div>
+          <div id="bet-result" style="margin-top:12px;"></div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function placeBet(team){
+  const amount = parseInt(document.getElementById('bet-amount').value)||0;
+  if(amount < 100){ showNotif('Minimum taruhan $100!','warn'); return; }
+  if(G.cash < amount){ showNotif('Cash tidak cukup!','warn'); return; }
+  G.cash -= amount;
+  const win = Math.random() < 0.5;
+  const resultEl = document.getElementById('bet-result');
+  if(win){
+    const gain = amount*2;
+    G.cash += gain;
+    if(resultEl) resultEl.innerHTML = `<div style="background:#f0fff4; border:1px solid #c3e6cb; border-radius:8px; padding:12px; text-align:center;"><div style="font-size:22px;">🎉</div><div style="font-weight:800; color:#1a7c39; font-size:15px;">${team} MENANG!</div><div style="font-size:13px; color:#155724; margin-top:4px;">Dapat +${fmtMoney(gain)}!</div></div>`;
+    addLog(`⚽ Taruhan berhasil! ${team} menang. Dapat ${fmtMoney(gain)}`,'good');
+  } else {
+    if(resultEl) resultEl.innerHTML = `<div style="background:#fff0f0; border:1px solid #f5c6cb; border-radius:8px; padding:12px; text-align:center;"><div style="font-size:22px;">😞</div><div style="font-weight:800; color:#7c1a1a; font-size:15px;">${team} KALAH!</div><div style="font-size:13px; color:#721c24; margin-top:4px;">Rugi ${fmtMoney(amount)}</div></div>`;
+    addLog(`⚽ Taruhan kalah. ${team} kalah. Rugi ${fmtMoney(amount)}`,'bad');
+  }
+  renderHUD(); saveProgress();
+}
+
+function renderNewsPage(el){
+  const newsHtml = G.newsLog.length === 0
+    ? '<div style="color:#888; font-size:13px; padding:16px; text-align:center;">Belum ada berita. Tekan Age+ untuk memulai tahun baru.</div>'
+    : G.newsLog.slice(0,15).map(n=>`
+        <div style="border-bottom:1px solid #e5e5ea; padding:12px 0;">
+          <div style="font-size:11px; color:#888; margin-bottom:4px;">Emiten ${n.ticker} · Usia ${n.year} tahun</div>
+          <div style="font-size:14px; color:#1c1c1e; font-weight:600;">${n.text}</div>
+        </div>
+      `).join('');
+
+  el.innerHTML = `
+    <div class="sim-browser">
+      <div class="browser-bar">
+        <div class="browser-url">beritasim.id — Berita Ekonomi</div>
+      </div>
+      <div class="browser-content">
+        <div style="font-weight:800; font-size:16px; color:#1c1c1e; margin-bottom:14px;">📰 BeritaSim.id — Kabar Pasar</div>
+        ${newsHtml}
+      </div>
+    </div>
+  `;
+}
+
+
+// ─── ACTION MODALS ────────────────────────────────────────────────────
+function showPassport(){
+  const country = COUNTRIES[G.country]||COUNTRIES['Indonesia'];
+  openModal(`
+    <div class="passport-doc">
+      <div style="text-align:center; margin-bottom:16px;">
+        <div style="font-size:36px;">${G.flag}</div>
+        <div style="font-size:16px; font-weight:900; letter-spacing:2px; margin-top:6px; color:#2ecc71;">PASPOR / PASSPORT</div>
+        <div style="font-size:13px; opacity:.7; margin-top:2px;">${G.country.toUpperCase()}</div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:12px; margin-bottom:12px;">
+        <div><div style="opacity:.6;">Nama Lengkap</div><div style="font-weight:700; margin-top:2px; color:#2ecc71;">${G.name}</div></div>
+        <div><div style="opacity:.6;">Jenis Kelamin</div><div style="font-weight:700; margin-top:2px;">${G.gender}</div></div>
+        <div><div style="opacity:.6;">Tempat Lahir</div><div style="font-weight:700; margin-top:2px;">${G.birthCity}</div></div>
+        <div><div style="opacity:.6;">Usia</div><div style="font-weight:700; margin-top:2px;">${G.age} tahun</div></div>
+        <div><div style="opacity:.6;">Kewarganegaraan</div><div style="font-weight:700; margin-top:2px;">${G.country}</div></div>
+        <div><div style="opacity:.6;">Status Hukum</div><div style="font-weight:700; margin-top:2px; color:${G.legalStatus==='Bebas'?'#2ecc71':'#ff3b30'}">${G.legalStatus}</div></div>
+        <div><div style="opacity:.6;">No. Paspor</div><div style="font-weight:700; margin-top:2px; font-family:monospace;">${G.passportNum}</div></div>
+        <div><div style="opacity:.6;">Sifat Bawaan</div><div style="font-weight:700; margin-top:2px; color:#007aff;">${G.trait}</div></div>
+      </div>
+      <div style="border-top:1px solid rgba(46,204,113,.3); padding-top:10px; font-family:monospace; font-size:10px; color:#2ecc71; letter-spacing:1px; word-break:break-all;">
+        P${G.country.substring(0,3).toUpperCase()}${G.name.replace(/\s/g,'').toUpperCase().substring(0,9)}${G.passportNum}
+      </div>
+    </div>
+    <button class="btn-gray" style="width:100%; margin-top:12px;" onclick="closeModal()">Tutup</button>
+  `);
+}
+
+function emigrate(){
+  if(G.cash < 2500){ showNotif('Butuh $2.500 untuk emigrasi!','warn'); return; }
+  const options = Object.keys(COUNTRIES).filter(c=>c!==G.country);
+  const optHtml = options.map(c=>`
+    <button class="event-choice-btn" onclick="doEmigrate('${c}')">
+      ${COUNTRIES[c].flag} ${c} — Modal awal: ${fmtMoney(COUNTRIES[c].startMoney)} · ${COUNTRIES[c].birthCity}
+    </button>
+  `).join('');
+  openModal(`
+    <h3 style="font-size:18px; font-weight:800; margin-bottom:4px;">✈️ Emigrasi</h3>
+    <p style="font-size:13px; color:#8e8e93; margin-bottom:16px;">Biaya: $2.500 · Pilih negara tujuan:</p>
+    ${optHtml}
+    <button class="btn-gray" style="width:100%; margin-top:8px;" onclick="closeModal()">Batal</button>
+  `);
+}
+
+function doEmigrate(country){
+  G.cash -= 2500;
+  const c = COUNTRIES[country];
+  G.country = country;
+  G.flag = c.flag;
+  G.currency = c.currency;
+  G.birthCity = c.birthCity;
+  addLog(`✈️ Pindah kewarganegaraan ke ${country}. Biaya: $2.500`,'good');
+  closeModal();
+  renderHUD(); renderCharInfo(); saveProgress();
+}
+
+function drivingTest(){
+  if(G.hasSIM){ showNotif('Kamu sudah punya SIM!','info'); return; }
+  if(G.cash < 1400){ showNotif('Butuh $1.400 untuk ujian SIM!','warn'); return; }
+  if(G.age < 17){ showNotif('Minimal usia 17 tahun!','warn'); return; }
+  const quiz = pick(DRIVING_QUIZZES);
+  openModal(`
+    <div style="text-align:center; margin-bottom:16px;">
+      <div style="font-size:32px; margin-bottom:6px;">🚗</div>
+      <h3 style="font-size:17px; font-weight:800;">Ujian Teori SIM</h3>
+      <p style="font-size:12px; color:#8e8e93; margin-top:4px;">Biaya ujian: $1.400</p>
+    </div>
+    <div style="background:#2c2c2e; border-radius:10px; padding:14px; margin-bottom:16px;">
+      <p style="font-size:14px; font-weight:600; line-height:1.6;">${quiz.q}</p>
+    </div>
+    <div id="quiz-opts">
+      ${quiz.opts.map((o,i)=>`<button class="quiz-opt" onclick="answerDrivingQuiz(${i},${quiz.ans})">${String.fromCharCode(65+i)}. ${o}</button>`).join('')}
+    </div>
+  `, false);
+  window._drivingQuizCost = 1400;
+}
+
+function answerDrivingQuiz(chosen, correct){
+  const opts = document.querySelectorAll('.quiz-opt');
+  opts.forEach((el,i)=>{ el.disabled = true; el.classList.add(i===correct?'correct':(i===chosen?'wrong':'')); });
+
+  if(chosen === correct){
+    G.cash -= 1400;
+    G.hasSIM = true;
+    addLog('🚗 Lulus ujian teori SIM! SIM resmi diterbitkan.','good');
+    showNotif('Selamat! SIM berhasil diperoleh 🚗','info');
+    setTimeout(()=>{ closeModal(); renderCharInfo(); saveProgress(); }, 1500);
+  } else {
+    G.cash -= 700;
+    addLog('😔 Gagal ujian teori SIM. Bayar denda $700.','bad');
+    showNotif('Jawaban salah. Gagal ujian SIM. Coba lagi!','warn');
+    setTimeout(()=>{ closeModal(); saveProgress(); }, 1500);
+  }
+}
+
+function goHospital(){
+  if(G.stats.health >= 100){ showNotif('Kesehatanmu sudah 100%!','info'); return; }
+  const cost = (100 - G.stats.health) * 50;
+  openModal(`
+    <div style="text-align:center; margin-bottom:16px;">
+      <div style="font-size:36px; margin-bottom:6px;">🏥</div>
+      <h3 style="font-size:18px; font-weight:800;">Rumah Sakit</h3>
+      <p style="font-size:13px; color:#8e8e93; margin-top:4px;">Kesehatan saat ini: ${G.stats.health}%</p>
+    </div>
+    <div style="background:#2c2c2e; border-radius:10px; padding:14px; margin-bottom:14px;">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-size:14px;">Biaya rawat inap & pengobatan:</span>
+        <span style="font-weight:800; font-size:16px; color:#ff3b30;">${fmtMoney(cost)}</span>
+      </div>
+      <div style="font-size:12px; color:#8e8e93; margin-top:6px;">Rumus: (100 - ${G.stats.health}%) × $50</div>
+    </div>
+    <div style="display:flex; gap:10px;">
+      <button class="btn-green" style="flex:1;" onclick="doHospital(${cost})">✅ Bayar & Berobat</button>
+      <button class="btn-gray" style="flex:1;" onclick="closeModal()">Batal</button>
+    </div>
+  `);
+}
+
+function doHospital(cost){
+  if(G.cash < cost){ showNotif('Cash tidak cukup!','warn'); return; }
+  G.cash -= cost;
+  G.stats.health = 100;
+  G.stats.stress = clamp(G.stats.stress - 10);
+  addLog(`🏥 Berobat di rumah sakit. Biaya: ${fmtMoney(cost)}. Kesehatan pulih 100%!`,'good');
+  closeModal();
+  renderStats(); renderHUD(); saveProgress();
+}
+
+function familyDinner(){
+  if(G.cash < 1000){ showNotif('Butuh $1.000!','warn'); return; }
+  G.cash -= 1000;
+  G.familyPrestige = clamp(G.familyPrestige+15);
+  G.stats.social = clamp(G.stats.social+10);
+  G.stats.happiness = clamp(G.stats.happiness+8);
+  addLog('🍽️ Mengadakan makan malam keluarga besar. Gengsi +15, Sosial +10!','good');
+  showNotif('Makan malam sukses! Gengsi keluarga meningkat 🍽️','info');
+  saveProgress(); renderStats();
+}
+
+function showHobbyMenu(){
+  const hobbies = [
+    { id:'gym',      icon:'💪', name:'Langganan Gym',   cost:'$50/thn',  effect:'+3% Fitness, +2% Kesehatan' },
+    { id:'billiard', icon:'🎱', name:'Main Billiard',   cost:'$100/thn', effect:'+4% Sosial, -5% Stres' },
+    { id:'coding',   icon:'💻', name:'Kursus Coding',   cost:'$300/thn', effect:`+${G.trait==='Analytical'?'6':'5'}% Kecerdasan` }
+  ];
+  openModal(`
+    <h3 style="font-size:18px; font-weight:800; margin-bottom:16px;">🎯 Hobi & Gaya Hidup</h3>
+    <p style="font-size:13px; color:#8e8e93; margin-bottom:14px;">Pilih hobi rutin yang akan memotong cash setiap tahun:</p>
+    ${hobbies.map(h=>{
+      const hasIt = G.hobbies.includes(h.id);
+      return `
+        <div style="background:#2c2c2e; border-radius:10px; padding:14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span style="font-size:20px;">${h.icon}</span>
+              <span style="font-weight:700; font-size:14px;">${h.name}</span>
+            </div>
+            <div style="font-size:12px; color:#8e8e93;">${h.cost} · ${h.effect}</div>
+          </div>
+          ${hasIt
+            ? `<button class="btn-red" style="padding:7px 14px; font-size:12px;" onclick="toggleHobby('${h.id}')">Berhenti</button>`
+            : `<button class="btn-green" style="padding:7px 14px; font-size:12px;" onclick="toggleHobby('${h.id}')">Mulai</button>`
+          }
+        </div>
+      `;
+    }).join('')}
+    <button class="btn-gray" style="width:100%; margin-top:8px;" onclick="closeModal()">Tutup</button>
+  `);
+}
+
+function toggleHobby(id){
+  if(G.hobbies.includes(id)){
+    G.hobbies = G.hobbies.filter(h=>h!==id);
+    addLog(`🎯 Berhenti dari hobi: ${id}.`,'neutral');
+  } else {
+    G.hobbies.push(id);
+    addLog(`🎯 Mulai hobi baru: ${id}! Efek akan terasa setiap tahun.`,'good');
+  }
+  closeModal();
+  showHobbyMenu();
+  saveProgress();
+}
+
+function showSexuality(){
+  const sexOptions = ['Heteroseksual','Biseksual','Homosexual','Aseksual'];
+  const fashionOptions = ['Kasual','Formal','Streetwear','Bohemian','Sporty','Artsy'];
+  openModal(`
+    <h3 style="font-size:18px; font-weight:800; margin-bottom:16px;">💕 Seksualitas & Gaya Pakaian</h3>
+    <p class="sub-section">Seksualitas</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:16px;">
+      ${sexOptions.map(s=>`<button class="${G.sexuality===s?'btn-blue':'btn-gray'}" style="font-size:13px;" onclick="setSexuality('${s}')">${s}</button>`).join('')}
+    </div>
+    <p class="sub-section">Gaya Pakaian</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+      ${fashionOptions.map(f=>`<button class="${G.fashionStyle===f?'btn-blue':'btn-gray'}" style="font-size:13px;" onclick="setFashion('${f}')">${f}</button>`).join('')}
+    </div>
+    <button class="btn-gray" style="width:100%; margin-top:14px;" onclick="closeModal()">Simpan & Tutup</button>
+  `);
+}
+
+function setSexuality(s){ G.sexuality=s; closeModal(); showSexuality(); renderCharInfo(); saveProgress(); }
+function setFashion(f){ G.fashionStyle=f; closeModal(); showSexuality(); renderCharInfo(); saveProgress(); }
+
+// ─── MODAL HELPERS ────────────────────────────────────────────────────
+function openModal(html, closable=true){
+  const container = document.getElementById('modal-container');
+  container.innerHTML = `
+    <div class="modal-overlay" ${closable?'onclick="if(event.target===this)closeModal()"':''}>
+      <div class="modal-box">${html}</div>
+    </div>
+  `;
+}
+
+function closeModal(){
+  document.getElementById('modal-container').innerHTML = '';
+}
+
+
+// ─── BOOTSTRAP ────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', ()=>{
+  showMainMenu();
+  // Auto-bank interest each year handled in renderBank
+});
+
+// Keyboard shortcut: Space = next year
+document.addEventListener('keydown', e=>{
+  if(e.code==='Space' && document.getElementById('game-container').style.display!=='none'){
+    e.preventDefault();
+    nextYear();
+  }
+});
+
+</script>
+</body>
+</html>
